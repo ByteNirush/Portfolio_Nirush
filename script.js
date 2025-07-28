@@ -1,79 +1,86 @@
-// DOM Elements
-const loading = document.getElementById("loading");
-const landing = document.getElementById("landing");
-const portfolio = document.getElementById("portfolio");
-const enterBtn = document.getElementById("enterBtn");
-const progress = document.getElementById("progress");
-const countdown = document.getElementById("countdown");
-const mobileMenuBtn = document.getElementById("mobileMenuBtn");
-const mobileMenu = document.getElementById("mobileMenu");
-const navLinks = mobileMenu.querySelectorAll("a");
-const contactForm = document.getElementById("contactForm");
+// DOM Elements - Cached for performance
+const elements = {
+  loading: document.getElementById("loading"),
+  landing: document.getElementById("landing"),
+  portfolio: document.getElementById("portfolio"),
+  enterBtn: document.getElementById("enterBtn"),
+  progress: document.getElementById("progress"),
+  countdown: document.getElementById("countdown"),
+  mobileMenuBtn: document.getElementById("mobileMenuBtn"),
+  mobileMenu: document.getElementById("mobileMenu"),
+  contactForm: document.getElementById("contactForm"),
+};
 
-// Initialize
+// Initialize application
 document.addEventListener("DOMContentLoaded", () => {
+  initializeLandingScreen();
+  initializeAnimations();
+  initializeTabs();
+  initializeSmoothScrolling();
+});
+
+// Landing screen initialization with auto-enter functionality
+function initializeLandingScreen() {
   // Hide loading screen after 1 second
   setTimeout(() => {
-    loading.style.opacity = "0";
+    elements.loading.style.opacity = "0";
     setTimeout(() => {
-      loading.style.display = "none";
+      elements.loading.style.display = "none";
     }, 500);
   }, 1000);
 
-  // // Auto-enter portfolio after 3 seconds
+  // Auto-enter portfolio after 3 seconds
   let timeLeft = 3;
-  const timer = setInterval(() => {
+  let timer;
+  let entered = false;
+
+  function safeEnterPortfolio() {
+    if (entered) return;
+    entered = true;
+    clearInterval(timer);
+    enterPortfolio();
+  }
+
+  timer = setInterval(() => {
     timeLeft--;
-    countdown.textContent = timeLeft;
-    progress.style.width = `${(3 - timeLeft) * 33.33}%`;
+    elements.countdown.textContent = timeLeft;
+    elements.progress.style.width = `${(3 - timeLeft) * 33.33}%`;
 
     if (timeLeft <= 0) {
-      clearInterval(timer);
-      enterPortfolio();
+      safeEnterPortfolio();
     }
   }, 1000);
 
-  // Initialize animations
-  initializeAnimations();
+  elements.enterBtn.addEventListener("click", safeEnterPortfolio);
+}
 
-  // Initialize tab functionality
-  initializeTabs();
-
-  // Initialize smooth scrolling
-  initializeSmoothScrolling();
-
-  // Initialize scroll effects
-  initializeScrollEffects();
-});
-
-// // Enter Portfolio Function
+// Enter Portfolio Function
 function enterPortfolio() {
-  landing.style.opacity = "0";
+  elements.landing.style.opacity = "0";
   setTimeout(() => {
-    landing.style.display = "none";
-    portfolio.style.opacity = "1";
+    elements.landing.style.display = "none";
+    elements.portfolio.style.opacity = "1";
     startCounterAnimations();
   }, 500);
 }
 
-// Manual enter button
-enterBtn.addEventListener("click", enterPortfolio);
+// Removed duplicate event listener - already handled in initializeLandingScreen()
 
-// Toggle Menu on Button Click
-mobileMenuBtn.addEventListener("click", () => {
-  mobileMenu.classList.toggle("hidden");
+// Mobile menu functionality
+elements.mobileMenuBtn.addEventListener("click", () => {
+  elements.mobileMenu.classList.toggle("hidden");
 });
 
-// Auto-close Menu after Link Click
-navLinks.forEach((link) => {
+// Auto-close mobile menu on link click
+elements.mobileMenu.querySelectorAll("a").forEach((link) => {
   link.addEventListener("click", () => {
     if (window.innerWidth < 768) {
-      mobileMenu.classList.add("hidden");
+      elements.mobileMenu.classList.add("hidden");
     }
   });
 });
 
-// Tab Functionality
+// Tab Functionality - Simplified for better performance
 function initializeTabs() {
   const tabBtns = document.querySelectorAll(".tab-btn");
   const tabContents = document.querySelectorAll(".portfolio-tab-content");
@@ -82,55 +89,22 @@ function initializeTabs() {
     btn.addEventListener("click", () => {
       const targetTab = btn.dataset.tab;
 
-      tabBtns.forEach((b) => {
-        b.classList.remove("active", "bg-purple-600", "text-white");
-        b.classList.add(
-          "text-gray-600",
-          "dark:text-gray-400",
-          "hover:bg-gray-100",
-          "dark:hover:bg-gray-800"
-        );
-      });
-
+      // Remove active states from all tabs and contents
+      tabBtns.forEach((b) => b.classList.remove("active"));
       tabContents.forEach((content) => {
         content.classList.remove("active");
-        content.style.display = "none";
         content.classList.add("hidden");
       });
 
+      // Show target content
       const targetContent = document.getElementById(targetTab);
       if (targetContent) {
         targetContent.classList.add("active");
-        targetContent.style.display = "block";
         targetContent.classList.remove("hidden");
-        targetContent.style.opacity = "0";
-        setTimeout(() => {
-          targetContent.style.opacity = "1";
-        }, 100);
       }
 
-      btn.classList.add("active", "bg-purple-600", "text-white");
-      btn.classList.remove("text-gray-600", "dark:text-gray-400");
-    });
-  });
-
-  // Set initial active state
-  const firstTab = tabBtns[0];
-  if (firstTab) {
-    firstTab.classList.add("bg-purple-600", "text-white");
-    firstTab.classList.remove("text-gray-600", "dark:text-gray-400");
-  }
-
-  document.querySelectorAll(".tab-btn").forEach((btn) => {
-    btn.addEventListener("click", function (e) {
-      // Remove pulse from all
-      document
-        .querySelectorAll(".tab-btn")
-        .forEach((b) => b.classList.remove("pulse"));
-      // Add pulse to clicked
-      this.classList.add("pulse");
-      // Remove after animation
-      setTimeout(() => this.classList.remove("pulse"), 400);
+      // Set active state for clicked button
+      btn.classList.add("active");
     });
   });
 }
@@ -198,231 +172,262 @@ function initializeAnimations() {
     });
 }
 
-// Contact Form Handling
-contactForm.addEventListener("submit", (e) => {
+// Contact Form Handling - Streamlined validation
+elements.contactForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const formData = new FormData(contactForm);
-  const name = formData.get("name");
-  const email = formData.get("email");
-  const message = formData.get("message");
+  const formData = new FormData(elements.contactForm);
+  const name = formData.get("name")?.trim();
+  const email = formData.get("email")?.trim();
+  const message = formData.get("message")?.trim();
 
+  // Basic validation
   if (!name || !email || !message) {
     alert("Please fill in all fields");
     return;
   }
 
-  if (!isValidEmail(email)) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     alert("Please enter a valid email address");
     return;
   }
 
-  const submitBtn = contactForm.querySelector('button[type="submit"]');
+  const submitBtn = elements.contactForm.querySelector('button[type="submit"]');
   const originalText = submitBtn.textContent;
 
   submitBtn.textContent = "Sending...";
   submitBtn.disabled = true;
 
+  // Simulate form submission
   setTimeout(() => {
     submitBtn.textContent = "Message Sent!";
     submitBtn.style.background = "linear-gradient(to right, #10b981, #059669)";
+    alert("Message sent successfully!");
+
     setTimeout(() => {
       submitBtn.textContent = originalText;
       submitBtn.disabled = false;
       submitBtn.style.background = "";
-      contactForm.reset();
+      elements.contactForm.reset();
     }, 2000);
   }, 1500);
 });
 
-// Email validation helper
-function isValidEmail(email) {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-}
+// Removed redundant helper functions - inlined for simplicity
 
-// Add ripple effect to buttons
-document.addEventListener("click", (e) => {
-  if (e.target.tagName === "BUTTON" || e.target.closest("button")) {
-    const button =
-      e.target.tagName === "BUTTON" ? e.target : e.target.closest("button");
+// Optimized ripple effect - Simplified implementation
+const addRippleEffect = () => {
+  document.addEventListener("click", (e) => {
+    const button = e.target.closest("button");
+    if (!button || button.hasAttribute("data-no-ripple")) return;
+
     const ripple = document.createElement("span");
-    ripple.style.position = "absolute";
-    ripple.style.borderRadius = "50%";
-    ripple.style.background = "rgba(255, 255, 255, 0.3)";
-    ripple.style.transform = "scale(0)";
-    ripple.style.animation = "ripple 0.6s linear";
-    ripple.style.left =
-      e.clientX - button.getBoundingClientRect().left - 10 + "px";
-    ripple.style.top =
-      e.clientY - button.getBoundingClientRect().top - 10 + "px";
-    ripple.style.width = "20px";
-    ripple.style.height = "20px";
-    ripple.style.pointerEvents = "none";
-    button.style.position = "relative";
-    button.style.overflow = "hidden";
-    button.appendChild(ripple);
-    setTimeout(() => {
-      ripple.remove();
-    }, 600);
-  }
-});
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
 
-// Add CSS for ripple animation
-const style = document.createElement("style");
-style.textContent = `
-    @keyframes ripple {
-        to {
-            transform: scale(4);
-            opacity: 0;
-        }
+    // Simplified styling
+    ripple.style.cssText = `
+      position: absolute; border-radius: 50%; background: rgba(255,255,255,0.3);
+      transform: scale(0); animation: ripple 0.6s linear; pointer-events: none;
+      left: ${x}px; top: ${y}px; width: ${size}px; height: ${size}px;
+    `;
+
+    // Ensure button positioning
+    if (!button.style.position || button.style.position === "static") {
+      button.style.position = "relative";
+      button.style.overflow = "hidden";
     }
-`;
-document.head.appendChild(style);
 
-// Lazy load images
-const imageObserver = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      const img = entry.target;
-      if (img.dataset.src) {
-        img.src = img.dataset.src;
-        img.removeAttribute("data-src");
-        imageObserver.unobserve(img);
+    button.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  });
+};
+
+// Initialize ripple effect
+addRippleEffect();
+
+// Optimized lazy loading - Only if data-src images exist
+const initializeLazyLoading = () => {
+  const lazyImages = document.querySelectorAll("img[data-src]");
+  if (lazyImages.length === 0) return; // Skip if no lazy images
+
+  const imageObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          img.src = img.dataset.src;
+          img.removeAttribute("data-src");
+          imageObserver.unobserve(img);
+        }
+      });
+    },
+    { rootMargin: "50px" }
+  );
+
+  lazyImages.forEach((img) => imageObserver.observe(img));
+};
+
+// Initialize lazy loading
+initializeLazyLoading();
+
+// Optimized scroll spy - Throttled for better performance
+const initializeScrollSpy = () => {
+  const sections = document.querySelectorAll("section[id]");
+  const navLinks = document.querySelectorAll(".nav-link");
+
+  if (sections.length === 0 || navLinks.length === 0) return;
+
+  let ticking = false;
+
+  const updateActiveNav = () => {
+    const scrollY = window.scrollY + 100;
+    let current = "";
+
+    sections.forEach((section) => {
+      if (scrollY >= section.offsetTop) {
+        current = section.id;
+      }
+    });
+
+    navLinks.forEach((link) => {
+      link.classList.toggle(
+        "active",
+        link.getAttribute("href") === `#${current}`
+      );
+    });
+
+    ticking = false;
+  };
+
+  window.addEventListener(
+    "scroll",
+    () => {
+      if (!ticking) {
+        requestAnimationFrame(updateActiveNav);
+        ticking = true;
+      }
+    },
+    { passive: true }
+  );
+};
+
+// Initialize scroll spy
+initializeScrollSpy();
+
+// Simplified typing effect
+const initializeTypingEffect = () => {
+  const typingElement = document.getElementById("typing-text");
+  if (!typingElement) return;
+
+  const text = "Software Engineer";
+  let index = 0;
+  let isDeleting = false;
+
+  const typeText = () => {
+    const currentText = isDeleting
+      ? text.substring(0, index--)
+      : text.substring(0, ++index);
+    typingElement.textContent = currentText;
+
+    let speed = isDeleting ? 50 : 100;
+
+    if (!isDeleting && index === text.length) {
+      speed = 1500;
+      isDeleting = true;
+    } else if (isDeleting && index === 0) {
+      isDeleting = false;
+      speed = 500;
+    }
+
+    setTimeout(typeText, speed);
+  };
+
+  typeText();
+};
+
+// Initialize typing effect
+initializeTypingEffect();
+
+// Certificate Image Modal - Streamlined implementation
+const initializeCertificateModal = () => {
+  const certImages = document.querySelectorAll(".cert-img");
+  const modal = document.getElementById("image-modal");
+  const modalImg = document.getElementById("modal-img");
+  const closeModal = document.getElementById("close-modal");
+  const nextBtn = document.getElementById("next-btn");
+  const prevBtn = document.getElementById("prev-btn");
+
+  if (!modal || !modalImg || certImages.length === 0) return;
+
+  let currentIndex = 0;
+
+  const showImage = (index) => {
+    currentIndex = Math.max(0, Math.min(index, certImages.length - 1));
+    modalImg.src = certImages[currentIndex].src;
+    modalImg.alt = certImages[currentIndex].alt;
+  };
+
+  const openModal = (index) => {
+    showImage(index);
+    modal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeModalFunc = () => {
+    modal.classList.add("hidden");
+    document.body.style.overflow = "";
+  };
+
+  // Event listeners - Simplified
+  certImages.forEach((img, index) => {
+    img.addEventListener("click", () => openModal(index));
+  });
+
+  closeModal?.addEventListener("click", closeModalFunc);
+  nextBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    showImage((currentIndex + 1) % certImages.length);
+  });
+  prevBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    showImage((currentIndex - 1 + certImages.length) % certImages.length);
+  });
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModalFunc();
+  });
+
+  // Keyboard controls
+  document.addEventListener("keydown", (e) => {
+    if (modal.classList.contains("hidden")) return;
+
+    if (e.key === "Escape") closeModalFunc();
+    else if (e.key === "ArrowRight")
+      showImage((currentIndex + 1) % certImages.length);
+    else if (e.key === "ArrowLeft")
+      showImage((currentIndex - 1 + certImages.length) % certImages.length);
+  });
+};
+
+// Add essential CSS animations
+const addEssentialStyles = () => {
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
       }
     }
-  });
-});
-document.querySelectorAll("img[data-src]").forEach((img) => {
-  imageObserver.observe(img);
-});
+  `;
+  document.head.appendChild(style);
+};
 
-// Scroll Spy for Navbar Highlight & Underline
-const sections = document.querySelectorAll("section[id]");
-const navLinksAll = document.querySelectorAll(".nav-link");
+// Initialize essential styles
+addEssentialStyles();
 
-window.addEventListener("scroll", () => {
-  let current = "";
-  sections.forEach((section) => {
-    const sectionTop = section.offsetTop - 100;
-    if (window.scrollY >= sectionTop) {
-      current = section.getAttribute("id");
-    }
-  });
-
-  navLinksAll.forEach((link) => {
-    link.classList.remove("active");
-    if (link.getAttribute("href") === `#${current}`) {
-      link.classList.add("active");
-    }
-  });
-});
-
-// Typing Effect
-const text = "Software Engineer";
-const typingText = document.getElementById("typing-text");
-let index = 0;
-let isDeleting = false;
-
-function type() {
-  if (isDeleting) {
-    typingText.textContent = text.substring(0, index - 1);
-    index--;
-  } else {
-    typingText.textContent = text.substring(0, index + 1);
-    index++;
-  }
-
-  let speed = 100;
-
-  if (!isDeleting && index === text.length) {
-    speed = 1500;
-    isDeleting = true;
-  } else if (isDeleting && index === 0) {
-    isDeleting = false;
-    speed = 500;
-  }
-
-  setTimeout(type, speed);
-}
-
-type();
-
-// Certificate Image Modal Functionality
-
-const certImages = document.querySelectorAll(".cert-img");
-const modal = document.getElementById("image-modal");
-const modalImg = document.getElementById("modal-img");
-const closeModal = document.getElementById("close-modal");
-const nextBtn = document.getElementById("next-btn");
-const prevBtn = document.getElementById("prev-btn");
-
-let currentIndex = 0;
-
-function openModal(index) {
-  currentIndex = index;
-  modalImg.src = certImages[currentIndex].src;
-  modal.classList.remove("hidden");
-}
-
-function showNext() {
-  currentIndex = (currentIndex + 1) % certImages.length;
-  modalImg.src = certImages[currentIndex].src;
-}
-
-function showPrev() {
-  currentIndex = (currentIndex - 1 + certImages.length) % certImages.length;
-  modalImg.src = certImages[currentIndex].src;
-}
-
-function closeModalFunc() {
-  modal.classList.add("hidden");
-}
-
-closeModal.addEventListener("click", () => {
-  closeModalFunc();
-});
-
-nextBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  showNext();
-});
-
-prevBtn.addEventListener("click", (e) => {
-  e.stopPropagation();
-  showPrev();
-});
-
-modal.addEventListener("click", (e) => {
-  if (e.target === modal) {
-    closeModalFunc();
-  }
-});
-
-certImages.forEach((img, index) => {
-  img.addEventListener("click", () => {
-    openModal(index);
-  });
-});
-
-// Close Modal with ESC key
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !modal.classList.contains("hidden")) {
-    closeModalFunc();
-  }
-});
-
-// Keyboard Controls
-document.addEventListener("keydown", (e) => {
-  if (modal.classList.contains("hidden")) return;
-
-  if (e.key === "Escape") {
-    closeModalFunc();
-  } else if (e.key === "ArrowRight") {
-    showNext();
-  } else if (e.key === "ArrowLeft") {
-    showPrev();
-  }
-});
-
-
+// Initialize certificate modal
+initializeCertificateModal();

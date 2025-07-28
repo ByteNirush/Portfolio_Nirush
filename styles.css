@@ -1,0 +1,550 @@
+:root {
+  --primary-gradient: linear-gradient(
+    135deg,
+    #183153 0%,
+    #2e3a4f 50%,
+    #4fc3f7 100%
+  );
+  --accent-glow: rgba(79, 195, 247, 0.3);
+  --text-glow: rgba(255, 255, 255, 0.8);
+}
+
+body {
+  font-family: "Inter", sans-serif;
+  background: #0a2239;
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+.glass {
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Simplified and optimized loading screen */
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0a2239, #183153);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease-out;
+}
+.loading-content {
+  text-align: center;
+}
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(79, 195, 247, 0.3);
+  border-top: 3px solid #4fc3f7;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  animation: spin 1s linear infinite;
+}
+.loading-text {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #4fc3f7;
+  margin-bottom: 16px;
+}
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  background: #4fc3f7;
+  border-radius: 50%;
+  animation: bounce 1.4s ease-in-out infinite both;
+}
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Optimized landing screen */
+.landing-screen {
+  position: fixed;
+  inset: 0;
+  background: var(--primary-gradient);
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.5s ease-out;
+}
+.landing-background {
+  position: absolute;
+  inset: 0;
+  opacity: 0.1;
+  background: radial-gradient(circle at 50% 50%, #4fc3f7 0%, transparent 70%);
+  animation: backgroundShift 20s ease-in-out infinite;
+}
+.landing-content {
+  text-align: center;
+  color: white;
+  position: relative;
+  z-index: 10;
+}
+.profile-avatar {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 40px;
+  animation: profileFloat 3s ease-in-out infinite;
+}
+
+.avatar-ring {
+  position: absolute;
+  inset: 0;
+  border: 3px solid rgba(79, 195, 247, 0.5);
+  border-radius: 50%;
+  animation: rotate 10s linear infinite;
+}
+
+.avatar-ring::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border: 2px solid transparent;
+  border-top: 2px solid #4fc3f7;
+  border-radius: 50%;
+  animation: rotate 3s linear infinite reverse;
+}
+
+.avatar-inner {
+  position: absolute;
+  inset: 12px;
+  background: rgba(10, 34, 57, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(79, 195, 247, 0.3);
+  box-shadow: 0 0 30px var(--accent-glow),
+    inset 0 0 20px rgba(79, 195, 247, 0.1);
+}
+
+.avatar-inner i {
+  font-size: 3rem;
+  color: #4fc3f7;
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* Welcome Text */
+.welcome-text {
+  margin-bottom: 40px;
+}
+
+.welcome-title {
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-weight: 800;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #4fc3f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: 0 0 30px var(--text-glow);
+  animation: titleGlow 2s ease-in-out infinite alternate;
+}
+
+.welcome-subtitle {
+  font-size: 1.25rem;
+  opacity: 0.9;
+  color: #e2e8f0;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+/* Enhanced Enter Button */
+.enter-btn {
+  position: relative;
+  background: linear-gradient(135deg, #4fc3f7 0%, #2e3a4f 100%);
+  color: white;
+  padding: 16px 32px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border: 2px solid rgba(79, 195, 247, 0.5);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  margin-bottom: 40px;
+  box-shadow: 0 8px 32px rgba(79, 195, 247, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.enter-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 12px 40px rgba(79, 195, 247, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  border-color: #4fc3f7;
+}
+
+.enter-btn:active {
+  transform: translateY(0) scale(1.02);
+}
+
+.enter-btn.pulse-effect {
+  animation: buttonPulse 0.6s ease-out;
+}
+
+@keyframes buttonPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 40px rgba(79, 195, 247, 0.6);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.btn-text {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-text::after {
+  content: "→";
+  transition: transform 0.3s ease;
+}
+
+.enter-btn:hover .btn-text::after {
+  transform: translateX(4px);
+}
+
+.btn-ripple {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.enter-btn:hover .btn-ripple {
+  transform: translateX(100%);
+}
+
+/* Progress Section */
+.progress-section {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4fc3f7 0%, #ffffff 100%);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px var(--accent-glow);
+  width: 0%;
+}
+
+.progress-text {
+  font-size: 0.875rem;
+  opacity: 0.8;
+  color: #e2e8f0;
+}
+
+.countdown-number {
+  font-weight: 700;
+  color: #4fc3f7;
+  text-shadow: 0 0 10px var(--accent-glow);
+}
+
+/* Floating Particles */
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #4fc3f7;
+  border-radius: 50%;
+  opacity: 0.6;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.particle:nth-child(1) {
+  top: 20%;
+  left: 10%;
+  animation: particleFloat 6s ease-in-out infinite;
+}
+.particle:nth-child(2) {
+  top: 60%;
+  right: 15%;
+  animation: particleFloat 8s ease-in-out infinite 2s;
+}
+.particle:nth-child(3) {
+  bottom: 30%;
+  left: 20%;
+  animation: particleFloat 7s ease-in-out infinite 1s;
+}
+.particle:nth-child(4) {
+  top: 40%;
+  right: 30%;
+  animation: particleFloat 9s ease-in-out infinite 3s;
+}
+.particle:nth-child(5) {
+  bottom: 20%;
+  right: 10%;
+  animation: particleFloat 5s ease-in-out infinite 1.5s;
+}
+
+/* Animations */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landingFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes backgroundShift {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(30px, -30px) rotate(120deg);
+  }
+  66% {
+    transform: translate(-20px, 20px) rotate(240deg);
+  }
+}
+
+@keyframes profileFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes titleGlow {
+  0% {
+    text-shadow: 0 0 20px var(--text-glow);
+  }
+  100% {
+    text-shadow: 0 0 30px var(--accent-glow), 0 0 40px var(--accent-glow);
+  }
+}
+
+@keyframes particleFloat {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+    opacity: 0.6;
+  }
+  33% {
+    transform: translateY(-20px) translateX(10px);
+    opacity: 1;
+  }
+  66% {
+    transform: translateY(10px) translateX(-5px);
+    opacity: 0.8;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 32px;
+  }
+
+  .avatar-inner i {
+    font-size: 2.5rem;
+  }
+
+  .enter-btn {
+    padding: 14px 28px;
+    font-size: 1rem;
+  }
+
+  .progress-section {
+    max-width: 250px;
+  }
+}
+
+/* Tab pulse animation */
+@keyframes tabPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(79, 195, 247, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(79, 195, 247, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(79, 195, 247, 0);
+  }
+}
+.tab-btn.pulse {
+  animation: tabPulse 0.4s;
+}
+
+/* Gradient animation */
+@keyframes gradient-x {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 12s ease-in-out infinite;
+}
+
+/* Skill animations */
+@keyframes skillFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes skillPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+.skill-category:hover {
+  animation: skillFloat 2s ease-in-out infinite;
+}
+.skill-category:hover .skill-icon {
+  animation: skillPulse 1s ease-in-out infinite;
+}
+
+/* Optimized skill badge styles */
+.skill-badge {
+  transform: translateZ(0);
+  will-change: transform, box-shadow;
+  backface-visibility: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.skill-badge:hover {
+  transform: translateZ(0) scale(1.1);
+}
+
+/* Accessibility improvements */
+@media (prefers-contrast: high) {
+  .skill-badge {
+    border-width: 2px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skill-badge,
+  .skill-category:hover {
+    animation: none;
+    transition: none;
+  }
+  .skill-badge:hover {
+    transform: none;
+  }
+}
+.skill-badge:focus-visible {
+  outline: 2px solid #4fc3f7;
+  outline-offset: 2px;
+}
+
+/* Navigation active state */
+.nav-link.active {
+  color: #ffd600 !important;
+  border-bottom: 3px solid #ffd600;
+  padding-bottom: 2px;
+  transition: border-color 0.3s, color 0.3s;
+}
+.nav-link:hover {
+  color: #ffffff !important;
+}
