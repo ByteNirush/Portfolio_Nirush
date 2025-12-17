@@ -1,433 +1,452 @@
-// DOM Elements - Cached for performance
-const elements = {
-  loading: document.getElementById("loading"),
-  landing: document.getElementById("landing"),
-  portfolio: document.getElementById("portfolio"),
-  enterBtn: document.getElementById("enterBtn"),
-  progress: document.getElementById("progress"),
-  countdown: document.getElementById("countdown"),
-  mobileMenuBtn: document.getElementById("mobileMenuBtn"),
-  mobileMenu: document.getElementById("mobileMenu"),
-  contactForm: document.getElementById("contactForm"),
-};
-
-// Initialize application
 document.addEventListener("DOMContentLoaded", () => {
-  initializeLandingScreen();
-  initializeAnimations();
-  initializeTabs();
-  initializeSmoothScrolling();
-});
+  // --- DOM Elements ---
+  const themeToggle = document.getElementById("themeToggle");
+  const tabItems = document.querySelectorAll(".tab-item");
+  const tabContents = document.querySelectorAll(
+    ".grid-container, .skills-container, .project-cards-container"
+  );
+  const modal = document.getElementById("imageModal");
+  const modalImg = document.getElementById("modalImg");
+  const closeModal = document.querySelector(".close-modal");
+  const navMenu = document.getElementById("navMenu");
+  const mobileMenuBtn = document.getElementById("mobileMenuBtn"); // Might be null on desktop layout if removed
 
-// Landing screen initialization with auto-enter functionality
-function initializeLandingScreen() {
-  // Hide loading screen after 1 second
-  setTimeout(() => {
-    elements.loading.style.opacity = "0";
-    setTimeout(() => {
-      elements.loading.style.display = "none";
-    }, 500);
-  }, 1000);
-
-  // Auto-enter portfolio after 3 seconds
-  let timeLeft = 3;
-  let timer;
-  let entered = false;
-
-  function safeEnterPortfolio() {
-    if (entered) return;
-    entered = true;
-    clearInterval(timer);
-    enterPortfolio();
+  // --- Theme Toggle ---
+  // Check local storage
+  const currentTheme = localStorage.getItem("theme");
+  if (currentTheme) {
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    updateThemeIcon(currentTheme);
   }
 
-  timer = setInterval(() => {
-    timeLeft--;
-    elements.countdown.textContent = timeLeft;
-    elements.progress.style.width = `${(3 - timeLeft) * 33.33}%`;
-
-    if (timeLeft <= 0) {
-      safeEnterPortfolio();
-    }
-  }, 1000);
-
-  elements.enterBtn.addEventListener("click", safeEnterPortfolio);
-}
-
-// Enter Portfolio Function
-function enterPortfolio() {
-  elements.landing.style.opacity = "0";
-  setTimeout(() => {
-    elements.landing.style.display = "none";
-    elements.portfolio.style.opacity = "1";
-    startCounterAnimations();
-  }, 500);
-}
-
-// Removed duplicate event listener - already handled in initializeLandingScreen()
-
-// Mobile menu functionality
-elements.mobileMenuBtn.addEventListener("click", () => {
-  elements.mobileMenu.classList.toggle("hidden");
-});
-
-// Auto-close mobile menu on link click
-elements.mobileMenu.querySelectorAll("a").forEach((link) => {
-  link.addEventListener("click", () => {
-    if (window.innerWidth < 768) {
-      elements.mobileMenu.classList.add("hidden");
-    }
-  });
-});
-
-// Tab Functionality - Simplified for better performance
-function initializeTabs() {
-  const tabBtns = document.querySelectorAll(".tab-btn");
-  const tabContents = document.querySelectorAll(".portfolio-tab-content");
-
-  tabBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const targetTab = btn.dataset.tab;
-
-      // Remove active states from all tabs and contents
-      tabBtns.forEach((b) => b.classList.remove("active"));
-      tabContents.forEach((content) => {
-        content.classList.remove("active");
-        content.classList.add("hidden");
-      });
-
-      // Show target content
-      const targetContent = document.getElementById(targetTab);
-      if (targetContent) {
-        targetContent.classList.add("active");
-        targetContent.classList.remove("hidden");
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      let theme = document.documentElement.getAttribute("data-theme");
+      if (theme === "light") {
+        theme = "dark";
+      } else {
+        theme = "light";
       }
 
-      // Set active state for clicked button
-      btn.classList.add("active");
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
+      updateThemeIcon(theme);
     });
-  });
-}
+  }
 
-// Smooth Scrolling
-function initializeSmoothScrolling() {
-  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-    anchor.addEventListener("click", function (e) {
-      e.preventDefault();
-      const target = document.querySelector(this.getAttribute("href"));
-      if (target) {
-        const offsetTop = target.offsetTop - 80;
-        window.scrollTo({
-          top: offsetTop,
-          behavior: "smooth",
+  function updateThemeIcon(theme) {
+    if (!themeToggle) return;
+    const icon = themeToggle.querySelector("i");
+    if (theme === "light") {
+      icon.classList.remove("fa-sun");
+      icon.classList.add("fa-moon");
+    } else {
+      icon.classList.remove("fa-moon");
+      icon.classList.add("fa-sun");
+    }
+  }
+
+  // --- Mobile Menu Toggle (if exists) ---
+  if (mobileMenuBtn && navMenu) {
+    mobileMenuBtn.addEventListener("click", () => {
+      navMenu.classList.toggle("active");
+      // Update icon logic if needed
+    });
+  }
+
+  // --- Tab Switching ---
+  tabItems.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      // Remove active class from all buttons
+      tabItems.forEach((b) => b.classList.remove("active"));
+      // Add active class to clicked button
+      btn.classList.add("active");
+
+      const targetTab = btn.getAttribute("data-tab");
+
+      // Hide all contents
+      tabContents.forEach((content) => {
+        if (content.classList.contains("active")) {
+          content.classList.remove("active");
+          content.classList.add("hidden");
+        }
+      });
+
+      // Show Target
+      const targetContent = document.getElementById(targetTab);
+      if (targetContent) {
+        targetContent.classList.remove("hidden");
+        // Trigger reflow to restart animation
+        void targetContent.offsetWidth;
+        targetContent.classList.add("active");
+
+        // Re-trigger/Reset animations for children cards
+        const cards = targetContent.querySelectorAll(
+          ".project-card, .skill-group"
+        );
+        cards.forEach((card, index) => {
+          card.classList.remove("animate-hidden"); // Ensure visible
+          card.style.animation = "none";
+          card.offsetHeight; /* trigger reflow */
+          card.style.animation = `slideUp 0.5s ease-out forwards ${
+            index * 0.1
+          }s`;
         });
       }
     });
   });
-}
 
-// Counter Animations
-function startCounterAnimations() {
-  const counters = document.querySelectorAll(".counter");
-  counters.forEach((counter) => {
-    const target = parseInt(counter.dataset.target);
-    const increment = target / 60;
-    let current = 0;
-    const updateCounter = () => {
-      if (current < target) {
-        current += increment;
-        counter.textContent = Math.ceil(current);
-        requestAnimationFrame(updateCounter);
-      } else {
-        counter.textContent = target;
+  // --- Image Modal ---
+  // Helper to open modal
+  function openModal(imgSrc) {
+    modal.style.display = "flex";
+    modalImg.src = imgSrc;
+  }
+
+  // Handle Certificate "View Button" clicks
+  const certSection = document.getElementById("certifications");
+  if (certSection) {
+    certSection.addEventListener("click", (e) => {
+      const btn = e.target.closest(".btn-primary");
+      if (btn) {
+        e.preventDefault();
+        const card = btn.closest(".project-card");
+        const img = card.querySelector("img");
+        if (img) {
+          openModal(img.src);
+        }
       }
-    };
-    updateCounter();
-  });
-}
+    });
+  }
 
-// Initialize Animations with Intersection Observer
-function initializeAnimations() {
+  // Keep existing grid-item logic if needed, or remove if all converted.
+  // There are no .grid-items left in the main sections provided (Projects/Certs/Skills are converted/different).
+  // But keeping a fallback for safety if other sections use grid-item.
+  document.querySelectorAll(".grid-item").forEach((item) => {
+    item.addEventListener("click", (e) => {
+      if (e.target.closest("a")) return;
+      const img = item.querySelector("img");
+      const hasOverlay = item.querySelector(".overlay");
+      if (img && !hasOverlay) {
+        openModal(img.src);
+      }
+    });
+  });
+
+  if (closeModal) {
+    closeModal.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+  }
+
+  // Close modal when clicking outside
+  window.addEventListener("click", (e) => {
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
+  });
+
+  // --- Intersection Observer for Animations ---
   const observerOptions = {
-    threshold: 0.1,
+    threshold: 0.15,
     rootMargin: "0px 0px -50px 0px",
   };
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        entry.target.style.opacity = "1";
-        entry.target.style.transform = "translateY(0)";
+        // Remove the hidden class to allow animations to play
+        entry.target.classList.remove("animate-hidden");
+
+        // Add specific animation classes if they were not already waiting (optional logic, but mainly just removing hidden works with CSS forwards)
+        // Check if element has specific delay classes or animation classes
+        if (entry.target.classList.contains("project-card")) {
+          // entry.target.classList.add('animate-slide-up');
+          // handled by CSS helper class on HTML if we add it, or we can add it here.
+          // Let's rely on the classes we add in HTML or dynamically here.
+          entry.target.style.animationName = "slideUp";
+          entry.target.style.animationDuration = "0.6s";
+          entry.target.style.animationFillMode = "forwards";
+        } else if (entry.target.classList.contains("skill-group")) {
+          entry.target.style.animationName = "slideUp";
+          entry.target.style.animationDuration = "0.5s";
+          entry.target.style.animationFillMode = "forwards";
+        }
+
+        observer.unobserve(entry.target);
       }
     });
   }, observerOptions);
 
-  document
-    .querySelectorAll(".animate-slide-up, .animate-fade-in")
-    .forEach((el) => {
-      el.style.opacity = "0";
-      el.style.transform = "translateY(30px)";
-      el.style.transition = "opacity 0.6s ease-out, transform 0.6s ease-out";
-      observer.observe(el);
-    });
-}
-
-// Contact Form Handling - Streamlined validation
-elements.contactForm.addEventListener("submit", (e) => {
-  e.preventDefault();
-
-  const formData = new FormData(elements.contactForm);
-  const name = formData.get("name")?.trim();
-  const email = formData.get("email")?.trim();
-  const message = formData.get("message")?.trim();
-
-  // Basic validation
-  if (!name || !email || !message) {
-    alert("Please fill in all fields");
-    return;
-  }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    alert("Please enter a valid email address");
-    return;
-  }
-
-  const submitBtn = elements.contactForm.querySelector('button[type="submit"]');
-  const originalText = submitBtn.textContent;
-
-  submitBtn.textContent = "Sending...";
-  submitBtn.disabled = true;
-
-  // Simulate form submission
-  setTimeout(() => {
-    submitBtn.textContent = "Message Sent!";
-    submitBtn.style.background = "linear-gradient(to right, #10b981, #059669)";
-    alert("Message sent successfully!");
-
-    setTimeout(() => {
-      submitBtn.textContent = originalText;
-      submitBtn.disabled = false;
-      submitBtn.style.background = "";
-      elements.contactForm.reset();
-    }, 2000);
-  }, 1500);
-});
-
-// Removed redundant helper functions - inlined for simplicity
-
-// Optimized ripple effect - Simplified implementation
-const addRippleEffect = () => {
-  document.addEventListener("click", (e) => {
-    const button = e.target.closest("button");
-    if (!button || button.hasAttribute("data-no-ripple")) return;
-
-    const ripple = document.createElement("span");
-    const rect = button.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const x = e.clientX - rect.left - size / 2;
-    const y = e.clientY - rect.top - size / 2;
-
-    // Simplified styling
-    ripple.style.cssText = `
-      position: absolute; border-radius: 50%; background: rgba(255,255,255,0.3);
-      transform: scale(0); animation: ripple 0.6s linear; pointer-events: none;
-      left: ${x}px; top: ${y}px; width: ${size}px; height: ${size}px;
-    `;
-
-    // Ensure button positioning
-    if (!button.style.position || button.style.position === "static") {
-      button.style.position = "relative";
-      button.style.overflow = "hidden";
-    }
-
-    button.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 600);
+  // Observe existing sections and specific elements
+  document.querySelectorAll("section").forEach((section) => {
+    // observer.observe(section);
+    // Don't observe whole sections for big animations, observe children if possible
   });
-};
 
-// Initialize ripple effect
-addRippleEffect();
+  // Observe Hero elements (already have classes, just need the 'animate-hidden' removal logic or just let them run on load if not hidden?)
+  // Actually, hero elements have 'animate-hidden' so we need to validly unhide them.
+  // Since they are at top, we can just remove 'animate-hidden' on load for hero or observe them.
+  document
+    .querySelectorAll(".animate-hidden")
+    .forEach((el) => observer.observe(el));
 
-// Optimized lazy loading - Only if data-src images exist
-const initializeLazyLoading = () => {
-  const lazyImages = document.querySelectorAll("img[data-src]");
-  if (lazyImages.length === 0) return; // Skip if no lazy images
+  // Also observe project cards even if they are dynamic (will need to re-observe if tabs change content generation - but content is static HTML hidden)
+  document.querySelectorAll(".project-card").forEach((card, index) => {
+    card.classList.add("animate-hidden"); // Ensure they start hidden
+    // Add stagger delay
+    card.style.animationDelay = `${index * 0.1}s`;
+    observer.observe(card);
+  });
 
-  const imageObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const img = entry.target;
-          img.src = img.dataset.src;
-          img.removeAttribute("data-src");
-          imageObserver.unobserve(img);
-        }
-      });
-    },
-    { rootMargin: "50px" }
-  );
-
-  lazyImages.forEach((img) => imageObserver.observe(img));
-};
-
-// Initialize lazy loading
-initializeLazyLoading();
-
-// Optimized scroll spy - Throttled for better performance
-const initializeScrollSpy = () => {
+  document.querySelectorAll(".skill-group").forEach((group, index) => {
+    group.classList.add("animate-hidden");
+    group.style.animationDelay = `${index * 0.1}s`;
+    observer.observe(group);
+  });
+  // --- Active ScrollSpy for Navigation ---
   const sections = document.querySelectorAll("section[id]");
   const navLinks = document.querySelectorAll(".nav-link");
 
-  if (sections.length === 0 || navLinks.length === 0) return;
+  const scrollObserverOptions = {
+    threshold: 0.3, // Trigger when 30% of section is visible
+  };
 
-  let ticking = false;
+  const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute("id");
 
-  const updateActiveNav = () => {
-    const scrollY = window.scrollY + 100;
-    let current = "";
+        // Remove active from all
+        navLinks.forEach((link) => {
+          link.classList.remove("active");
+          // Also handle mobile menu items if they differ slightly, but selectors match .nav-link
+        });
 
-    sections.forEach((section) => {
-      if (scrollY >= section.offsetTop) {
-        current = section.id;
+        // Add active to current
+        const activeLink = document.querySelector(`.nav-link[href="#${id}"]`);
+        if (activeLink) {
+          activeLink.classList.add("active");
+        }
       }
     });
+  }, scrollObserverOptions);
 
-    navLinks.forEach((link) => {
-      link.classList.toggle(
-        "active",
-        link.getAttribute("href") === `#${current}`
-      );
+  sections.forEach((section) => {
+    scrollObserver.observe(section);
+  });
+
+  // --- Background Animation ---
+  initBackgroundAnimation();
+
+  function initBackgroundAnimation() {
+    const canvas = document.getElementById("bg-canvas");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    let width, height;
+    let particles = [];
+
+    // Configuration
+    const particleCount = 80; // Increased for better visual density
+    const connectionDistance = 150; // Distance to connect particles
+    const mouseDistance = 200; // Interaction radius
+
+    // Theme-aware colors
+    const themeColors = {
+      dark: {
+        particle: { r: 165, g: 201, b: 202 }, // Opal - text-secondary
+        particleOpacity: 0.6,
+        lineOpacity: 0.25,
+        glowColor: "rgba(217, 191, 119, 0.3)", // Gold accent glow
+      },
+      light: {
+        particle: { r: 46, g: 64, b: 82 }, // Charcoal - text-primary
+        particleOpacity: 0.5,
+        lineOpacity: 0.2,
+        glowColor: "rgba(200, 75, 49, 0.2)", // Terra Cotta accent glow
+      },
+    };
+
+    function getTheme() {
+      return document.documentElement.getAttribute("data-theme") === "light"
+        ? "light"
+        : "dark";
+    }
+
+    function getColors() {
+      return themeColors[getTheme()];
+    }
+
+    // Mouse state
+    let mouse = { x: null, y: null };
+
+    window.addEventListener("mousemove", (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
     });
 
-    ticking = false;
-  };
+    window.addEventListener("mouseout", () => {
+      mouse.x = null;
+      mouse.y = null;
+    });
 
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (!ticking) {
-        requestAnimationFrame(updateActiveNav);
-        ticking = true;
-      }
-    },
-    { passive: true }
-  );
-};
-
-// Initialize scroll spy
-initializeScrollSpy();
-
-// Simplified typing effect
-const initializeTypingEffect = () => {
-  const typingElement = document.getElementById("typing-text");
-  if (!typingElement) return;
-
-  const text = "Software Engineer";
-  let index = 0;
-  let isDeleting = false;
-
-  const typeText = () => {
-    const currentText = isDeleting
-      ? text.substring(0, index--)
-      : text.substring(0, ++index);
-    typingElement.textContent = currentText;
-
-    let speed = isDeleting ? 50 : 100;
-
-    if (!isDeleting && index === text.length) {
-      speed = 1500;
-      isDeleting = true;
-    } else if (isDeleting && index === 0) {
-      isDeleting = false;
-      speed = 500;
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
     }
 
-    setTimeout(typeText, speed);
-  };
+    class Particle {
+      constructor() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.vx = (Math.random() - 0.5) * 0.6; // Slightly faster
+        this.vy = (Math.random() - 0.5) * 0.6;
+        this.baseSize = Math.random() * 2.5 + 1.5; // Larger particles
+        this.size = this.baseSize;
+        this.pulseSpeed = Math.random() * 0.02 + 0.01;
+        this.pulseOffset = Math.random() * Math.PI * 2;
+      }
 
-  typeText();
-};
+      update(time) {
+        this.x += this.vx;
+        this.y += this.vy;
 
-// Initialize typing effect
-initializeTypingEffect();
+        // Gentle pulse effect
+        this.size =
+          this.baseSize +
+          Math.sin(time * this.pulseSpeed + this.pulseOffset) * 0.5;
 
-// Certificate Image Modal - Streamlined implementation
-const initializeCertificateModal = () => {
-  const certImages = document.querySelectorAll(".cert-img");
-  const modal = document.getElementById("image-modal");
-  const modalImg = document.getElementById("modal-img");
-  const closeModal = document.getElementById("close-modal");
-  const nextBtn = document.getElementById("next-btn");
-  const prevBtn = document.getElementById("prev-btn");
+        // Bounce off edges
+        if (this.x < 0 || this.x > width) this.vx *= -1;
+        if (this.y < 0 || this.y > height) this.vy *= -1;
 
-  if (!modal || !modalImg || certImages.length === 0) return;
+        // Mouse interaction
+        if (mouse.x != null) {
+          let dx = mouse.x - this.x;
+          let dy = mouse.y - this.y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
 
-  let currentIndex = 0;
+          if (distance < mouseDistance) {
+            const forceDirectionX = dx / distance;
+            const forceDirectionY = dy / distance;
+            const force = (mouseDistance - distance) / mouseDistance;
+            const directionX = forceDirectionX * force * this.size;
+            const directionY = forceDirectionY * force * this.size;
 
-  const showImage = (index) => {
-    currentIndex = Math.max(0, Math.min(index, certImages.length - 1));
-    modalImg.src = certImages[currentIndex].src;
-    modalImg.alt = certImages[currentIndex].alt;
-  };
+            // Gentle push away
+            this.vx -= directionX * 0.05;
+            this.vy -= directionY * 0.05;
+          }
+        }
+      }
 
-  const openModal = (index) => {
-    showImage(index);
-    modal.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
-  };
+      draw() {
+        const colors = getColors();
+        const { r, g, b } = colors.particle;
 
-  const closeModalFunc = () => {
-    modal.classList.add("hidden");
-    document.body.style.overflow = "";
-  };
+        // Draw glow effect
+        const gradient = ctx.createRadialGradient(
+          this.x,
+          this.y,
+          0,
+          this.x,
+          this.y,
+          this.size * 3
+        );
+        gradient.addColorStop(
+          0,
+          `rgba(${r}, ${g}, ${b}, ${colors.particleOpacity})`
+        );
+        gradient.addColorStop(
+          0.5,
+          `rgba(${r}, ${g}, ${b}, ${colors.particleOpacity * 0.3})`
+        );
+        gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
 
-  // Event listeners - Simplified
-  certImages.forEach((img, index) => {
-    img.addEventListener("click", () => openModal(index));
-  });
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
+        ctx.fillStyle = gradient;
+        ctx.fill();
 
-  closeModal?.addEventListener("click", closeModalFunc);
-  nextBtn?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    showImage((currentIndex + 1) % certImages.length);
-  });
-  prevBtn?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    showImage((currentIndex - 1 + certImages.length) % certImages.length);
-  });
-
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) closeModalFunc();
-  });
-
-  // Keyboard controls
-  document.addEventListener("keydown", (e) => {
-    if (modal.classList.contains("hidden")) return;
-
-    if (e.key === "Escape") closeModalFunc();
-    else if (e.key === "ArrowRight")
-      showImage((currentIndex + 1) % certImages.length);
-    else if (e.key === "ArrowLeft")
-      showImage((currentIndex - 1 + certImages.length) % certImages.length);
-  });
-};
-
-// Add essential CSS animations
-const addEssentialStyles = () => {
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes ripple {
-      to {
-        transform: scale(4);
-        opacity: 0;
+        // Draw core particle
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${
+          colors.particleOpacity + 0.2
+        })`;
+        ctx.fill();
       }
     }
-  `;
-  document.head.appendChild(style);
-};
 
-// Initialize essential styles
-addEssentialStyles();
+    function initParticles() {
+      particles = [];
+      for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+      }
+    }
 
-// Initialize certificate modal
-initializeCertificateModal();
+    let animationTime = 0;
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      animationTime++;
+
+      particles.forEach((particle) => {
+        particle.update(animationTime);
+        particle.draw();
+      });
+
+      connectParticles();
+      requestAnimationFrame(animate);
+    }
+
+    function connectParticles() {
+      const colors = getColors();
+      const { r, g, b } = colors.particle;
+
+      for (let a = 0; a < particles.length; a++) {
+        for (let b = a; b < particles.length; b++) {
+          let dx = particles[a].x - particles[b].x;
+          let dy = particles[a].y - particles[b].y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < connectionDistance) {
+            let opacityValue = 1 - distance / connectionDistance;
+            ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, ${
+              opacityValue * colors.lineOpacity
+            })`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(particles[a].x, particles[a].y);
+            ctx.lineTo(particles[b].x, particles[b].y);
+            ctx.stroke();
+          }
+        }
+      }
+    }
+
+    // Initialize
+    resize();
+    initParticles();
+    animate();
+
+    window.addEventListener("resize", () => {
+      resize();
+      initParticles();
+    });
+
+    // Listen for theme changes to update particle colors dynamically
+    const themeObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "data-theme") {
+          // Colors are read dynamically in draw/connect functions, no need to reinit
+        }
+      });
+    });
+
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+  }
+});
