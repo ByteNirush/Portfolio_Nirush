@@ -1,15 +1,34 @@
 "use client";
 
+import { useTextAnimation, useStaggeredAnimation } from "@/app/hooks/useTextAnimation";
+
+// Animation timing configuration (in milliseconds)
+const ANIMATION_DELAYS = {
+  title: 100,       // Section title fade in
+  grid: 200,        // Grid container visibility
+  stagger: 100,     // Delay between grid items
+} as const;
+
 export default function AboutSection() {
+  const [titleRef, isTitleVisible] = useTextAnimation<HTMLHeadingElement>({ delay: ANIMATION_DELAYS.title });
+  const [gridRef, visibleCards] = useStaggeredAnimation<HTMLDivElement>(2, { delay: ANIMATION_DELAYS.grid });
+
   return (
     <section id="about" className="about-section">
       <div className="container">
-        <h2>About Me</h2>
-        <div className="about-grid">
+        <h2 
+          ref={titleRef}
+          className={`section-title animate-hidden ${isTitleVisible ? 'animate-fade-in-down' : ''}`}
+        >
+          <span className="title-decorator" aria-hidden="true" />
+          About Me
+          <span className="title-decorator" aria-hidden="true" />
+        </h2>
+        <div ref={gridRef} className="about-grid">
           {/* Main Bio Card */}
-          <div className="about-card glass animate-slide-up">
+          <article className={`about-card glass animate-hidden ${visibleCards.has(0) ? 'animate-fade-in-left' : ''}`}>
             <h3>
-              <i className="fas fa-user-astronaut"></i> My Journey
+              <i className="fas fa-user-astronaut" aria-hidden="true"></i> My Journey
             </h3>
             <p>
               I am a <strong>Computer Science & Software Engineering</strong>{" "}
@@ -34,12 +53,12 @@ export default function AboutSection() {
               practices, and industry standards, aiming to write code that is not
               only functional but also clean, testable, and easy to maintain.
             </p>
-          </div>
+          </article>
 
           {/* Philosophy Card */}
-          <div className="about-card glass animate-slide-up delay-100">
+          <article className={`about-card glass animate-hidden ${visibleCards.has(1) ? 'animate-fade-in-right delay-100' : ''}`}>
             <h3>
-              <i className="fas fa-lightbulb"></i> Philosophy
+              <i className="fas fa-lightbulb" aria-hidden="true"></i> Philosophy
             </h3>
             <p>
               I believe that good software starts with <strong>simplicity</strong>{" "}
@@ -56,24 +75,24 @@ export default function AboutSection() {
               <strong>continuous learning</strong>, and I strive to improve every
               project through iteration and feedback.
             </p>
-            <div className="timeline">
-              <div className="timeline-item">
+            <div className="timeline" role="list" aria-label="Career timeline">
+              <div className="timeline-item" role="listitem">
                 <span className="year">2024 - Present</span>
                 <span className="desc">B.Sc. (Hons) Software Engineering</span>
                 <p>University of Bedfordshire</p>
               </div>
-              <div className="timeline-item">
+              <div className="timeline-item" role="listitem">
                 <span className="year">2025</span>
                 <span className="desc">Active Open Source Contributor</span>
                 <p>GitHub & Community Projects</p>
               </div>
             </div>
-          </div>
+          </article>
 
           {/* Interests Card */}
-          <div className="about-card glass animate-slide-up delay-200 full-width-card">
+          <article className="about-card glass full-width-card">
             <h3>
-              <i className="fas fa-heart"></i> Beyond Coding
+              <i className="fas fa-heart" aria-hidden="true"></i> Beyond Coding
             </h3>
             <p>
               When I&apos;m not coding, I actively explore new technologies, cloud
@@ -89,7 +108,7 @@ export default function AboutSection() {
               professionally, and continue developing into a skilled software
               engineer who builds impactful solutions.
             </p>
-          </div>
+          </article>
         </div>
       </div>
     </section>

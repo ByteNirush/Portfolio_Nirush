@@ -4,15 +4,15 @@ import {
   AboutSection,
   PortfolioSection,
   ContactSection,
-  BackgroundCanvas,
+  SnowEffect,
 } from "./components";
 
 export default function Home() {
   return (
     <>
-      <BackgroundCanvas />
+      <SnowEffect />
       <Navbar />
-      <main>
+      <main className="main-content">
         <HeroSection />
         <AboutSection />
         <PortfolioSection />

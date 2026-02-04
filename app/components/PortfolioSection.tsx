@@ -1,198 +1,135 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTextAnimation } from "@/app/hooks/useTextAnimation";
+import TechStackGrid from "./TechStackGrid";
+import StarField from "./StarField";
+import {
+  PROJECTS,
+  CERTIFICATIONS,
+  SKILLS,
+  type Project,
+  type Certification,
+  type Skill,
+  type Tab,
+} from "./portfolioData";
 
-// Types
-interface ProjectLink {
-  label: string;
-  href: string;
-  primary: boolean;
-  icon?: string;
-}
+// Animation configuration
+const ANIMATION_STAGGER_DELAY = 50;   // Delay between card animations (ms)
+const ANIMATION_THRESHOLD = 0.1;      // Intersection observer threshold
 
-interface Project {
-  title: string;
-  description: string;
-  image: string;
-  tech: string[];
-  links: ProjectLink[];
-}
-
-// Project Data
-const projects: Project[] = [
-  {
-    title: "CollabBoard – Real-Time Collaborative Whiteboard",
-    description:
-      "Collaborative whiteboard application with real-time drawing, user authentication, and board management.",
-    image: "/project/CollabBoard.png",
-    tech: ["Go", "PostgreSQL", "WebSockets", "React", "TypeScript", "Docker"],
-    links: [{ label: "View Project", href: "https://github.com/ByteNirush/CollabBoard.git", primary: true }],
-  },
-  {
-    title: "Elevator Control System",
-    description:
-      "A complete Windows Forms application demonstrating Object-Oriented Programming principles and software engineering best practices through an elevator simulation system.",
-    image: "/project/Elevator.png",
-    tech: ["C#", ".NET", "Windows Forms", "SQLite"],
-    links: [{ label: "View Project", href: "https://github.com/ByteNirush/Elevator-Control-System.git", primary: true }],
-  },
-  {
-    title: "Electricity Bill System",
-    description:
-      "Comprehensive software to automate and streamline the electricity billing process: manage customer data, meter readings, bill generation, payment processing, and reporting.",
-    image: "/project/Electricity.png",
-    tech: ["Java", "JavaFX", "MySQL"],
-    links: [{ label: "View Project", href: "https://github.com/ByteNirush/Electricity-Bill-System-Group-17.git", primary: true }],
-  },
-  {
-    title: "FreshGuaard",
-    description:
-      "AI-Powered Waste Reduction & Recipe Recommendation, Ingredient Safety Scanner, Community Watch & Reporting.",
-    image: "/project/FreshGuaard.png",
-    tech: ["HTML", "Tailwind", "Python/Django"],
-    links: [{ label: "View Project", href: "https://github.com/ByteNirush/foodsafety", primary: true }],
-  },
-  {
-    title: "Taxi Booking System",
-    description:
-      "Desktop-based taxi booking platform. Enhanced skills in Python, Tkinter, and Database integration through a fully functional booking system.",
-    image: "/project/Taxi Booking System.png",
-    tech: ["Python", "Tkinter", "SQLite"],
-    links: [{ label: "View Project", href: "https://github.com/ByteNirush/Taxi_Booking_System.git", primary: true }],
-  },
-  {
-    title: "Self-Care Web App",
-    description:
-      "A comprehensive self-care platform with vision board, personal development, journal, and mood-based music recommendation.",
-    image: "/project/Self-Care.png",
-    tech: ["HTML/CSS", "JavaScript", "Firebase"],
-    links: [{ label: "View Project", href: "https://github.com/ByteNirush/BugBusters-Octopus-_Clockmakers.git", primary: true }],
-  },
-  {
-    title: "RescueEats",
-    description:
-      "RescueEats is a scalable, modern food delivery application built with Flutter. It connects customers with restaurants, offering a seamless ordering experience, real-time updates, and a gamified user experience.",
-    image: "/project/RescueEats.png",
-    tech: ["Flutter", "Dart", "Express.js", "Node.js", "Mongodb"],
-    links: [
-      { label: "Frontend", href: "https://github.com/ByteNirush/RescueEats-Frontend.git", primary: true, icon: "fab fa-github" },
-      { label: "Backend", href: "https://github.com/ByteNirush/RescueEats.git", primary: false, icon: "fab fa-github" },
-    ],
-  },
+// Tab configuration with icons
+const TABS: Tab[] = [
+  { id: "projects", label: "Projects", icon: "fas fa-th" },
+  { id: "certifications", label: "Certificates", icon: "fas fa-certificate" },
+  { id: "skills", label: "Skills", icon: "fas fa-code" },
 ];
-
-// Certifications Data
-const certifications = [
-  {
-    title: "Complete Go for Professional Developers",
-    issuer: "Frontend Masters",
-    date: "July 2025",
-    image: "/Certification/Go.png",
-  },
-  {
-    title: "Career Essentials in GitHub Professional Certificate",
-    issuer: "GitHub",
-    date: "January 2025",
-    image: "/Certification/GitHub.png",
-  },
-  {
-    title: "Responsive Web Design",
-    issuer: "freeCodeCamp",
-    date: "July 2024",
-    image: "/Certification/Web-Design.png",
-  },
-  {
-    title: "Scientific Computing with Python",
-    issuer: "freeCodeCamp",
-    date: "November 2024",
-    image: "/Certification/python.png",
-  },
-  {
-    title: "JavaScript Algorithms and Data Structures",
-    issuer: "freeCodeCamp",
-    date: "November 2024",
-    image: "/Certification/JavaScript.png",
-  },
-  {
-    title: "AWS Educate Getting Started with Databases",
-    issuer: "Amazon Web Services (AWS)",
-    date: "May 2025",
-    image: "/Certification/Databases.png",
-  },
-  {
-    title: "AWS Academy Graduate - AWS Academy Cloud Architecting",
-    issuer: "Amazon Web Services (AWS)",
-    date: "June 2025",
-    image: "/Certification/Academy.png",
-  },
-  {
-    title: "Career Essentials in Software Development by Microsoft and LinkedIn",
-    issuer: "Microsoft",
-    date: "February 2025",
-    image: "/Certification/Microsoft .png",
-  },
-];
-
-// Skills Data
-const skills = [
-  {
-    title: "Languages",
-    icon: "fas fa-code",
-    items: ["TypeScript", "Java", "Python", "Go", "C", "JavaScript", "C#"],
-  },
-  {
-    title: "Frameworks",
-    icon: "fas fa-layer-group",
-    items: ["Node.js", "Express", "Spring", "Swing", "JavaFX", "Django", "FastAPI", "Flask", "React", "Tailwind"],
-  },
-  {
-    title: "Databases",
-    icon: "fas fa-database",
-    items: ["PostgreSQL", "MySQL", "SQLite", "Firebase", "Supabase"],
-  },
-  {
-    title: "Cloud & DevOps",
-    icon: "fas fa-cloud",
-    items: ["AWS", "Docker", "Git/GitHub", "Vercel"],
-  },
-];
-
-interface ModalState {
-  isOpen: boolean;
-  imageSrc: string;
-}
 
 export default function PortfolioSection() {
   const [activeTab, setActiveTab] = useState<"projects" | "certifications" | "skills">("projects");
-  const [modal, setModal] = useState<ModalState>({ isOpen: false, imageSrc: "" });
+  const [modal, setModal] = useState<{ isOpen: boolean; imageSrc: string }>({ isOpen: false, imageSrc: "" });
 
-  const tabs = [
-    { id: "projects" as const, label: "Projects", icon: "fas fa-th" },
-    { id: "certifications" as const, label: "Certificates", icon: "fas fa-certificate" },
-    { id: "skills" as const, label: "Skills", icon: "fas fa-code" },
-  ];
+  const [titleRef, isTitleVisible] = useTextAnimation<HTMLHeadingElement>({ delay: 100 });
 
-  const openModal = (imageSrc: string) => {
+  // Animate cards on scroll
+  useEffect(() => {
+    const cards = document.querySelectorAll('.project-card');
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.classList.add('animate-in');
+            }, index * ANIMATION_STAGGER_DELAY);
+          }
+        });
+      },
+      { threshold: ANIMATION_THRESHOLD }
+    );
+
+    cards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, [activeTab]);
+
+  // Modal handlers
+  useEffect(() => {
+    if (!modal.isOpen) return;
+
+    document.body.style.overflow = 'hidden';
+
+    const handleEscapeKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setModal({ isOpen: false, imageSrc: "" });
+      }
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [modal.isOpen]);
+
+  const openModal = useCallback((imageSrc: string) => {
     setModal({ isOpen: true, imageSrc });
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setModal({ isOpen: false, imageSrc: "" });
+  }, []);
+
+  const getTabCount = (tabId: string) => {
+    switch (tabId) {
+      case 'projects': return PROJECTS.length;
+      case 'certifications': return CERTIFICATIONS.length;
+      case 'skills': return SKILLS.length;
+      default: return 0;
+    }
   };
 
   return (
-    <section id="portfolio" className="portfolio-section">
-      <div className="container">
-        <div className="tabs-container">
-          {tabs.map((tab) => (
+    <section
+      id="portfolio"
+      className={`portfolio-section transition-colors duration-700 ${activeTab === "skills"
+        ? "bg-[linear-gradient(to_bottom,rgb(2,6,23),rgb(15,23,42),rgb(30,27,75))]"
+        : ""
+        }`}
+    >
+      {activeTab === "skills" && <StarField />}
+
+      <div className="container relative z-10">
+        <h2
+          ref={titleRef}
+          className={`section-title animate-hidden ${isTitleVisible ? 'animate-fade-in-down' : ''} ${activeTab === "skills" ? "!text-white drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]" : ""
+            }`}
+        >
+          <span className="title-decorator" aria-hidden="true" />
+          Portfolio Showcase
+          <span className="title-decorator" aria-hidden="true" />
+        </h2>
+        <div
+          className="tabs-container"
+          role="tablist"
+          aria-label="Portfolio sections"
+        >
+          {TABS.map((tab) => (
             <button
               key={tab.id}
-              className={`tab-item ${activeTab === tab.id ? "active" : ""}`}
+              className={`tab-item ${activeTab === tab.id ? "active" : ""} ${activeTab === "skills" ? "text-slate-300 hover:text-white" : ""
+                } ${activeTab === "skills" && activeTab === tab.id ? "!text-white !bg-white/10" : ""}`}
               onClick={() => setActiveTab(tab.id)}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls={tab.id}
             >
-              <i className={tab.icon}></i> <span>{tab.label}</span>
+              <i className={tab.icon} aria-hidden="true"></i>
+              <span>{tab.label}</span>
+              <span className={`tab-count ${activeTab === "skills" ? "!bg-white/10 !text-white" : ""}`}>
+                {getTabCount(tab.id)}
+              </span>
             </button>
           ))}
         </div>
@@ -200,23 +137,26 @@ export default function PortfolioSection() {
         {/* Projects */}
         <div
           id="projects"
+          role="tabpanel"
+          aria-labelledby="projects-tab"
           className={`project-cards-container fade-in ${activeTab === "projects" ? "active" : ""}`}
         >
-          {projects.map((project, index) => (
-            <article key={index} className="project-card">
+          {PROJECTS.map((project, index) => (
+            <article key={index} className="project-card" style={{ '--card-index': index } as React.CSSProperties}>
               <div className="project-image">
                 <Image
                   src={project.image}
-                  alt={project.title}
+                  alt={`Screenshot of ${project.title}`}
                   width={400}
                   height={200}
                   loading="lazy"
                 />
+                <div className="project-image-overlay" aria-hidden="true" />
               </div>
               <div className="project-content">
                 <h3>{project.title}</h3>
                 <p>{project.description}</p>
-                <div className="project-tech-stack">
+                <div className="project-tech-stack" aria-label="Technologies used">
                   {project.tech.map((tech) => (
                     <span key={tech}>{tech}</span>
                   ))}
@@ -227,9 +167,11 @@ export default function PortfolioSection() {
                       key={i}
                       href={link.href}
                       target="_blank"
+                      rel="noopener noreferrer"
                       className={`btn ${link.primary ? "btn-primary" : "btn-secondary"}`}
                     >
-                      <i className={link.icon || "fas fa-eye"}></i> {link.label}
+                      <i className={link.icon || "fas fa-eye"} aria-hidden="true"></i>
+                      <span>{link.label}</span>
                     </Link>
                   ))}
                 </div>
@@ -241,29 +183,40 @@ export default function PortfolioSection() {
         {/* Certifications */}
         <div
           id="certifications"
+          role="tabpanel"
+          aria-labelledby="certifications-tab"
           className={`project-cards-container fade-in ${activeTab === "certifications" ? "active" : ""}`}
         >
-          {certifications.map((cert, index) => (
-            <article key={index} className="project-card">
-              <div className="project-image">
+          {CERTIFICATIONS.map((cert, index) => (
+            <article key={index} className="project-card" style={{ '--card-index': index } as React.CSSProperties}>
+              <div className="project-image cert-image">
                 <Image
                   src={cert.image}
-                  alt={cert.title}
+                  alt={`Certificate: ${cert.title}`}
                   width={400}
                   height={200}
                   loading="lazy"
                 />
+                <div className="cert-badge" aria-hidden="true">
+                  <i className="fas fa-award"></i>
+                </div>
               </div>
               <div className="project-content">
                 <h3>{cert.title}</h3>
-                <p>{cert.issuer}</p>
-                <span>Issued: {cert.date}</span>
+                <p className="cert-issuer">
+                  <i className="fas fa-building" aria-hidden="true"></i> {cert.issuer}
+                </p>
+                <span className="cert-date">
+                  <i className="fas fa-calendar-alt" aria-hidden="true"></i> Issued: {cert.date}
+                </span>
                 <div className="project-actions">
                   <button
                     className="btn btn-primary"
                     onClick={() => openModal(cert.image)}
+                    aria-label={`View ${cert.title} certificate`}
                   >
-                    <i className="fas fa-eye"></i> View Certificate
+                    <i className="fas fa-eye" aria-hidden="true"></i>
+                    <span>View Certificate</span>
                   </button>
                 </div>
               </div>
@@ -274,38 +227,40 @@ export default function PortfolioSection() {
         {/* Skills */}
         <div
           id="skills"
-          className={`project-cards-container fade-in ${activeTab === "skills" ? "active" : ""}`}
+          role="tabpanel"
+          aria-labelledby="skills-tab"
+          className={`fade-in ${activeTab === "skills" ? "active" : "hidden"}`}
         >
-          {skills.map((skill, index) => (
-            <article key={index} className="project-card">
-              <div className="project-image-icon">
-                <i className={skill.icon}></i>
-              </div>
-              <div className="project-content">
-                <h3>{skill.title}</h3>
-                <div className="project-tech-stack skills-view">
-                  {skill.items.map((item) => (
-                    <span key={item}>{item}</span>
-                  ))}
-                </div>
-              </div>
-            </article>
-          ))}
+          <TechStackGrid skills={SKILLS} />
         </div>
       </div>
 
       {/* Modal */}
-      <div className={`modal ${modal.isOpen ? "open" : ""}`} onClick={closeModal}>
-        <span className="close-modal">&times;</span>
+      <div
+        className={`modal ${modal.isOpen ? "open" : ""}`}
+        onClick={closeModal}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Certificate preview"
+      >
+        <button
+          className="close-modal"
+          onClick={closeModal}
+          aria-label="Close modal"
+        >
+          &times;
+        </button>
         {modal.imageSrc && (
-          <Image
-            src={modal.imageSrc}
-            alt="Certificate"
-            width={800}
-            height={600}
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="modal-image-wrapper">
+            <Image
+              src={modal.imageSrc}
+              alt="Certificate preview"
+              width={800}
+              height={600}
+              className="modal-content"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
         )}
       </div>
     </section>
