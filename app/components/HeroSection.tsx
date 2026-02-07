@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useTextAnimation } from "@/app/hooks/useTextAnimation";
 
@@ -112,14 +111,12 @@ export default function HeroSection() {
               ref={profileRef}
               style={{ transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)' }}
             >
-              <Image
+              <img
                 src="/profile/profile1.JPG"
                 alt="Nirush Man Shrestha - Software Engineer"
                 width={180}
                 height={180}
                 className="profile-image"
-                priority
-                quality={90}
               />
               <div className="profile-glow" aria-hidden="true" />
               <div className="status-indicator" title="Available for work">

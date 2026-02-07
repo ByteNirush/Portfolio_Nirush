@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useTextAnimation } from "@/app/hooks/useTextAnimation";
 import TechStackGrid from "./TechStackGrid";
@@ -144,7 +143,7 @@ export default function PortfolioSection() {
           {PROJECTS.map((project, index) => (
             <article key={index} className="project-card" style={{ '--card-index': index } as React.CSSProperties}>
               <div className="project-image">
-                <Image
+                <img
                   src={project.image}
                   alt={`Screenshot of ${project.title}`}
                   width={400}
@@ -190,7 +189,7 @@ export default function PortfolioSection() {
           {CERTIFICATIONS.map((cert, index) => (
             <article key={index} className="project-card" style={{ '--card-index': index } as React.CSSProperties}>
               <div className="project-image cert-image">
-                <Image
+                <img
                   src={cert.image}
                   alt={`Certificate: ${cert.title}`}
                   width={400}
@@ -252,7 +251,7 @@ export default function PortfolioSection() {
         </button>
         {modal.imageSrc && (
           <div className="modal-image-wrapper">
-            <Image
+            <img
               src={modal.imageSrc}
               alt="Certificate preview"
               width={800}

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Skill } from "./portfolioData";
 
 interface TechStackGridProps {
@@ -48,15 +47,11 @@ export default function TechStackGrid({ skills }: TechStackGridProps) {
                                         >
                                             {/* Icon rendering logic: Image or Font Icon */}
                                             {item.icon.startsWith("/") ? (
-                                                <div className="relative w-10 h-10 sm:w-12 sm:h-12 transition-transform duration-300 group-hover/item:scale-110 drop-shadow-lg">
-                                                    <Image
-                                                        src={item.icon}
-                                                        alt={`${item.name} icon`}
-                                                        fill
-                                                        className="object-contain"
-                                                        sizes="(max-width: 768px) 40px, 48px"
-                                                    />
-                                                </div>
+                                                <img
+                                                    src={item.icon}
+                                                    alt={`${item.name} icon`}
+                                                    className="w-10 h-10 sm:w-12 sm:h-12 transition-transform duration-300 group-hover/item:scale-110 drop-shadow-lg object-contain"
+                                                />
                                             ) : (
                                                 <i
                                                     className={`${item.icon} text-3xl sm:text-4xl md:text-5xl transition-transform duration-300 group-hover/item:scale-110 drop-shadow-lg text-gray-100`}
