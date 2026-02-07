@@ -1,38 +1,355 @@
-# Portfolio - Nirush Man Shrestha
+# 🚀 Portfolio - Nirush Man Shrestha
 
-This is a personal portfolio website built with Next.js.
+A modern, interactive personal portfolio website showcasing projects, skills, and professional experience. Built with cutting-edge web technologies and designed with accessibility, performance, and user experience in mind.
 
-## Getting Started
+🌐 **Live Site**: [nirushmanshrestha.com.np](https://nirushmanshrestha.com.np)
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [Development](#-development)
+- [Build & Deployment](#-build--deployment)
+- [Performance & Accessibility](#-performance--accessibility)
+- [License](#-license)
+
+---
+
+## 🎯 Overview
+
+This portfolio website serves as a comprehensive digital presence for showcasing software engineering skills, projects, and professional journey. The site features:
+
+- **Interactive UI/UX**: Smooth animations, 3D effects, and responsive design
+- **Performance Optimized**: Static site generation with Next.js App Router
+- **Accessible**: WCAG compliant with keyboard navigation and screen reader support
+- **Modern Architecture**: Component-based with TypeScript for type safety
+
+---
+
+## ✨ Features
+
+### 🏠 Hero Section
+- **3D Tilt Profile Image**: Interactive profile picture with physics-based 3D tilt effect
+- **Animated Text**: Custom scroll-triggered text animations
+- **Quick Links**: GitHub, LinkedIn, Email, and Resume download
+- **Professional Stats**: Years of experience, projects completed, and technology proficiencies
+
+### 👤 About Section
+- **Personal Journey**: Comprehensive background and career story
+- **Philosophy**: Development approach and values
+- **Timeline**: Educational and professional milestones
+- **Staggered Animations**: Cards fade in sequentially for visual appeal
+
+### 💼 Portfolio Section
+Multi-tab interface featuring:
+
+1. **Projects Tab**
+   - 6+ featured projects with descriptions, tech stacks, and live links
+   - Project cards with hover effects and smooth transitions
+   - Technology badges for quick stack identification
+
+2. **Certifications Tab**
+   - Professional certifications with issuer and date information
+   - Modal image viewer for certificate inspection
+   - Keyboard navigation support (ESC to close)
+
+3. **Skills Tab**
+   - Interactive tech stack grid with categories:
+     - Backend Development (Go, PostgreSQL, RESTful APIs)
+     - Frontend Development (React, TypeScript, Tailwind CSS)
+     - Tools & Platforms (Git, Docker, VS Code, Figma)
+   - Animated star field background effect
+   - Responsive skill cards with icons
+
+### 📬 Contact Section
+- **Contact Form**: Validated form with name, email, and message fields
+- **Form Validation**: Client-side validation with error handling
+- **Success/Error States**: Visual feedback for form submission
+- **Social Links**: Quick access to GitHub, LinkedIn, and Email
+
+### 🧭 Navigation
+- **Sticky Navbar**: Transparent on scroll with active section highlighting
+- **Theme Toggle**: Light/Dark mode with smooth transitions and localStorage persistence
+- **Mobile Responsive**: Hamburger menu with slide-in animation
+- **Smooth Scrolling**: Native smooth scroll to section anchors
+
+### 🎨 Visual Effects
+- **Snow Effect**: Canvas-based particle system with physics simulation
+  - Device-optimized (different particle counts for mobile/tablet/desktop)
+  - Performance-conscious with RAF and DPR optimization
+- **Glass Morphism**: Modern frosted glass UI elements
+- **Gradient Overlays**: Dynamic color gradients throughout the design
+
+---
+
+## 🛠 Tech Stack
+
+### Core Technologies
+- **[Next.js 16.1.5](https://nextjs.org/)** - React framework with App Router
+- **[React 19.2.3](https://react.dev/)** - UI library with latest features
+- **[TypeScript 5](https://www.typescriptlang.org/)** - Type-safe JavaScript
+- **[Tailwind CSS 4](https://tailwindcss.com/)** - Utility-first CSS framework
+
+### Development Tools
+- **ESLint 9** - Code linting and quality enforcement
+- **PostCSS** - CSS transformation pipeline
+- **Font Awesome** - Icon library for UI elements
+- **Google Fonts (Inter)** - Modern sans-serif typography
+
+### Key Dependencies
+```json
+{
+  "next": "16.1.5",
+  "react": "19.2.3",
+  "react-dom": "19.2.3",
+  "typescript": "^5",
+  "tailwindcss": "^4"
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Build Configuration
+- **Static Export**: Pre-rendered at build time for optimal performance
+- **Image Optimization**: Disabled for static hosting compatibility
+- **Trailing Slashes**: Enabled for consistent URL structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Project Structure
 
-## Learn More
+```
+Portfolio_Nirush/
+├── app/                          # Next.js App Directory
+│   ├── components/               # React Components
+│   │   ├── AboutSection.tsx      # About me section with timeline
+│   │   ├── ContactSection.tsx    # Contact form with validation
+│   │   ├── HeroSection.tsx       # Landing section with 3D effects
+│   │   ├── Navbar.tsx            # Navigation with theme toggle
+│   │   ├── PortfolioSection.tsx  # Projects/Certs/Skills tabs
+│   │   ├── SnowEffect.tsx        # Canvas particle animation
+│   │   ├── StarField.tsx         # Background star animation
+│   │   ├── TechStackGrid.tsx     # Skills grid component
+│   │   ├── portfolioData.ts      # Centralized data configuration
+│   │   └── index.ts              # Component exports
+│   ├── hooks/                    # Custom React Hooks
+│   │   └── useTextAnimation.ts   # Intersection Observer animations
+│   ├── globals.css               # Global styles and CSS variables
+│   ├── layout.tsx                # Root layout with metadata
+│   └── page.tsx                  # Home page composition
+├── public/                       # Static Assets
+│   ├── Certification/            # Certificate images
+│   ├── profile/                  # Profile pictures
+│   ├── project/                  # Project screenshots
+│   ├── skills/                   # Technology icons
+│   └── CNAME                     # Custom domain configuration
+├── eslint.config.mjs             # ESLint configuration
+├── next.config.ts                # Next.js configuration
+├── postcss.config.mjs            # PostCSS configuration
+├── tailwind.config.ts            # Tailwind CSS configuration
+├── tsconfig.json                 # TypeScript configuration
+└── package.json                  # Dependencies and scripts
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚀 Getting Started
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Prerequisites
 
-## Deploy on Vercel
+Ensure you have the following installed:
+- **Node.js**: Version 18.0 or higher
+- **npm/yarn/pnpm/bun**: Package manager of your choice
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Installation
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/ByteNirush/Portfolio_Nirush.git
+   cd Portfolio_Nirush
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   # or
+   bun install
+   ```
+
+3. **Run the development server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   # or
+   pnpm dev
+   # or
+   bun dev
+   ```
+
+4. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
+
+---
+
+## 💻 Development
+
+### Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server on port 3000 |
+| `npm run build` | Create optimized production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint for code quality checks |
+
+### Hot Module Replacement (HMR)
+
+The development server supports HMR, so changes to files are reflected immediately without a full page reload. Edit any file in the `app/` directory and see changes instantly.
+
+### Key Development Features
+
+- **TypeScript**: Full type safety across the codebase
+- **Auto-imports**: VS Code auto-imports for components and utilities
+- **Path Aliases**: Use `@/` to import from the project root
+- **CSS Variables**: Theme variables in `globals.css` for easy customization
+- **Component Isolation**: Each section is a self-contained component
+
+### Customization Guide
+
+#### Update Personal Information
+Edit [app/components/portfolioData.ts](app/components/portfolioData.ts):
+```typescript
+export const PROJECTS: Project[] = [
+  {
+    title: "Your Project",
+    description: "Project description",
+    image: "/project/image.png",
+    tech: ["React", "Node.js"],
+    links: [{ label: "View", href: "https://...", primary: true }]
+  }
+];
+```
+
+#### Modify Theme Colors
+Edit CSS variables in [app/globals.css](app/globals.css):
+```css
+:root {
+  --primary-blue: #3B82F6;
+  --accent-emerald: #34D399;
+  /* Add your custom colors */
+}
+```
+
+#### Add New Sections
+1. Create component in `app/components/`
+2. Import in `app/page.tsx`
+3. Add navigation link in `Navbar.tsx`
+
+---
+
+## 📦 Build & Deployment
+
+### Production Build
+
+Generate a static export for deployment:
+
+```bash
+npm run build
+```
+
+This creates an `out/` directory with static files ready for deployment.
+
+### Deployment Options
+
+#### 1. **Vercel** (Recommended)
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel --prod
+```
+
+#### 2. **GitHub Pages**
+```bash
+# Build and push to gh-pages branch
+npm run build
+# Push out/ directory to gh-pages branch
+```
+
+#### 3. **Netlify**
+- Connect GitHub repository
+- Set build command: `npm run build`
+- Set publish directory: `out`
+
+#### 4. **Custom Domain**
+Add `CNAME` file to `public/` with your domain:
+```text
+nirushmanshrestha.com.np
+```
+
+### Environment Variables
+
+No environment variables required for basic deployment. For contact form integration, add:
+
+```bash
+# .env.local
+NEXT_PUBLIC_FORM_ENDPOINT=your_form_api_endpoint
+```
+
+---
+
+## ⚡ Performance & Accessibility
+
+### Performance Optimizations
+
+- ✅ **Static Site Generation (SSG)**: Pre-rendered at build time
+- ✅ **Image Optimization**: Next.js Image component for optimal loading
+- ✅ **Code Splitting**: Automatic route-based code splitting
+- ✅ **Lazy Loading**: Intersection Observer for on-demand animations
+- ✅ **CSS Optimization**: Tailwind CSS purges unused styles
+- ✅ **Font Optimization**: Google Fonts with `font-display: swap`
+- ✅ **RequestAnimationFrame**: Smooth animations without blocking
+- ✅ **Passive Event Listeners**: Better scroll performance
+
+### Accessibility Features
+
+- ✅ **Semantic HTML**: Proper heading hierarchy and landmarks
+- ✅ **ARIA Labels**: Screen reader support for all interactive elements
+- ✅ **Keyboard Navigation**: Full keyboard accessibility
+- ✅ **Focus Management**: Visible focus indicators
+- ✅ **Reduced Motion**: Respects `prefers-reduced-motion` media query
+- ✅ **Color Contrast**: WCAG AA compliant color ratios
+- ✅ **Alt Text**: Descriptive alt text for all images
+- ✅ **Form Validation**: Clear error messages and validation
+
+### Browser Support
+
+- Chrome/Edge (last 2 versions)
+- Firefox (last 2 versions)
+- Safari (last 2 versions)
+- Mobile browsers (iOS Safari, Chrome Mobile)
+
+---
+
+## 🤝 Connect
+
+- **GitHub**: [@ByteNirush](https://github.com/ByteNirush)
+- **LinkedIn**: [Nirush Man Shrestha](https://www.linkedin.com/in/nirushmanshrestha/)
+- **Email**: [dev.nirush@gmail.com](mailto:dev.nirush@gmail.com)
+- **Website**: [nirushmanshrestha.com.np](https://nirushmanshrestha.com.np)
+
+---
+
+<div align="center">
+  <p>Built with ❤️ by Nirush Man Shrestha</p>
+  <p><strong>Software Engineer | Backend Developer | Open Source Contributor</strong></p>
+</div>
