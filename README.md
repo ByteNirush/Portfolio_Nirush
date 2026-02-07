@@ -14,9 +14,6 @@ A modern, interactive personal portfolio website showcasing projects, skills, an
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [Development](#-development)
-- [Build & Deployment](#-build--deployment)
-- [Performance & Accessibility](#-performance--accessibility)
-- [License](#-license)
 
 ---
 
@@ -222,122 +219,6 @@ The development server supports HMR, so changes to files are reflected immediate
 - **CSS Variables**: Theme variables in `globals.css` for easy customization
 - **Component Isolation**: Each section is a self-contained component
 
-### Customization Guide
-
-#### Update Personal Information
-Edit [app/components/portfolioData.ts](app/components/portfolioData.ts):
-```typescript
-export const PROJECTS: Project[] = [
-  {
-    title: "Your Project",
-    description: "Project description",
-    image: "/project/image.png",
-    tech: ["React", "Node.js"],
-    links: [{ label: "View", href: "https://...", primary: true }]
-  }
-];
-```
-
-#### Modify Theme Colors
-Edit CSS variables in [app/globals.css](app/globals.css):
-```css
-:root {
-  --primary-blue: #3B82F6;
-  --accent-emerald: #34D399;
-  /* Add your custom colors */
-}
-```
-
-#### Add New Sections
-1. Create component in `app/components/`
-2. Import in `app/page.tsx`
-3. Add navigation link in `Navbar.tsx`
-
----
-
-## 📦 Build & Deployment
-
-### Production Build
-
-Generate a static export for deployment:
-
-```bash
-npm run build
-```
-
-This creates an `out/` directory with static files ready for deployment.
-
-### Deployment Options
-
-#### 1. **Vercel** (Recommended)
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
-```
-
-#### 2. **GitHub Pages**
-```bash
-# Build and push to gh-pages branch
-npm run build
-# Push out/ directory to gh-pages branch
-```
-
-#### 3. **Netlify**
-- Connect GitHub repository
-- Set build command: `npm run build`
-- Set publish directory: `out`
-
-#### 4. **Custom Domain**
-Add `CNAME` file to `public/` with your domain:
-```text
-nirushmanshrestha.com.np
-```
-
-### Environment Variables
-
-No environment variables required for basic deployment. For contact form integration, add:
-
-```bash
-# .env.local
-NEXT_PUBLIC_FORM_ENDPOINT=your_form_api_endpoint
-```
-
----
-
-## ⚡ Performance & Accessibility
-
-### Performance Optimizations
-
-- ✅ **Static Site Generation (SSG)**: Pre-rendered at build time
-- ✅ **Image Optimization**: Next.js Image component for optimal loading
-- ✅ **Code Splitting**: Automatic route-based code splitting
-- ✅ **Lazy Loading**: Intersection Observer for on-demand animations
-- ✅ **CSS Optimization**: Tailwind CSS purges unused styles
-- ✅ **Font Optimization**: Google Fonts with `font-display: swap`
-- ✅ **RequestAnimationFrame**: Smooth animations without blocking
-- ✅ **Passive Event Listeners**: Better scroll performance
-
-### Accessibility Features
-
-- ✅ **Semantic HTML**: Proper heading hierarchy and landmarks
-- ✅ **ARIA Labels**: Screen reader support for all interactive elements
-- ✅ **Keyboard Navigation**: Full keyboard accessibility
-- ✅ **Focus Management**: Visible focus indicators
-- ✅ **Reduced Motion**: Respects `prefers-reduced-motion` media query
-- ✅ **Color Contrast**: WCAG AA compliant color ratios
-- ✅ **Alt Text**: Descriptive alt text for all images
-- ✅ **Form Validation**: Clear error messages and validation
-
-### Browser Support
-
-- Chrome/Edge (last 2 versions)
-- Firefox (last 2 versions)
-- Safari (last 2 versions)
-- Mobile browsers (iOS Safari, Chrome Mobile)
-
 ---
 
 ## 🤝 Connect
@@ -350,6 +231,12 @@ NEXT_PUBLIC_FORM_ENDPOINT=your_form_api_endpoint
 ---
 
 <div align="center">
-  <p>Built with ❤️ by Nirush Man Shrestha</p>
+  <p>
+  Built with ❤️ by 
+  <a href="https://nirushmanshrestha.com.np" target="_blank" rel="noopener noreferrer">
+    Nirush Man Shrestha
+  </a>
+</p>
+
   <p><strong>Software Engineer | Backend Developer | Open Source Contributor</strong></p>
 </div>
