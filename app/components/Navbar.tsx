@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import anime from "animejs/lib/anime.es.js";
+import { checkReducedMotion } from "@/app/utils/animations";
 
 // Navigation menu items configuration
 const NAV_ITEMS = [
@@ -18,47 +20,106 @@ const NAVBAR_SCROLL_THRESHOLD = 50;     // Scroll distance to trigger navbar sty
 const BOTTOM_THRESHOLD = 50;            // Distance from bottom to activate last section
 const SECTION_TOP_OFFSET = 120;         // Top offset for section visibility
 const THEME_ANIMATION_DURATION = 300;   // Theme toggle animation duration
+const PREFERS_DARK_QUERY = "(prefers-color-scheme: dark)";
 
 export default function Navbar() {
-  const [theme, setTheme] = useState<string>("dark");
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [scrolled, setScrolled] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const themeAnimationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const useSystemThemeRef = useRef(true);
 
   // Initialize theme from localStorage
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "dark";
-    setTheme(savedTheme);
-    document.documentElement.setAttribute("data-theme", savedTheme);
+    const savedTheme = localStorage.getItem("theme");
+    const mediaQuery = window.matchMedia(PREFERS_DARK_QUERY);
+    const systemTheme = mediaQuery.matches ? "dark" : "light";
+    const initialTheme = savedTheme === "light" || savedTheme === "dark" ? savedTheme : systemTheme;
+
+    useSystemThemeRef.current = !savedTheme;
+    document.documentElement.setAttribute("data-theme", initialTheme);
+    setTheme(initialTheme);
+
+    const handleSystemThemeChange = (event: MediaQueryListEvent) => {
+      if (!useSystemThemeRef.current) return;
+      const nextTheme = event.matches ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", nextTheme);
+      setTheme(nextTheme);
+    };
+
+    if (!savedTheme) {
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener("change", handleSystemThemeChange);
+      } else {
+        mediaQuery.addListener(handleSystemThemeChange);
+      }
+    }
+
+    return () => {
+      if (!savedTheme) {
+        if (mediaQuery.removeEventListener) {
+          mediaQuery.removeEventListener("change", handleSystemThemeChange);
+        } else {
+          mediaQuery.removeListener(handleSystemThemeChange);
+        }
+      }
+      if (themeAnimationTimeoutRef.current) clearTimeout(themeAnimationTimeoutRef.current);
+    };
   }, []);
+
+  // Initial navbar entrance animation
+  useEffect(() => {
+    if (checkReducedMotion()) return;
+
+    anime({
+      targets: ".navbar",
+      translateY: [-8, 0],
+      opacity: [0, 1],
+      duration: 500,
+      easing: "easeOutQuad",
+    });
+  }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [mobileMenuOpen]);
 
   // Handle scroll and active section detection
   useEffect(() => {
     const sections = document.querySelectorAll<HTMLElement>("section[id]");
-    
+
     const handleScrollAndActive = () => {
       const scrollY = window.scrollY;
       setScrolled(scrollY > NAVBAR_SCROLL_THRESHOLD);
-      
+
       const scrollPosition = scrollY + SCROLL_OFFSET;
       const isAtBottom = scrollY + window.innerHeight >= document.documentElement.scrollHeight - BOTTOM_THRESHOLD;
-      
+
       if (isAtBottom && sections.length > 0) {
         setActiveSection(sections[sections.length - 1].id);
         return;
       }
-      
+
       let currentSection = "home";
       sections.forEach((section) => {
         const sectionTop = section.offsetTop - SECTION_TOP_OFFSET;
         const sectionBottom = sectionTop + section.offsetHeight;
-        
+
         if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
           currentSection = section.id;
         }
       });
-      
+
       setActiveSection(currentSection);
     };
 
@@ -85,7 +146,7 @@ export default function Navbar() {
 
     document.addEventListener("click", handleOutsideClick);
     document.addEventListener("keydown", handleEscapeKey);
-    
+
     return () => {
       document.removeEventListener("click", handleOutsideClick);
       document.removeEventListener("keydown", handleEscapeKey);
@@ -93,23 +154,25 @@ export default function Navbar() {
   }, [mobileMenuOpen]);
 
   const toggleTheme = useCallback(() => {
+    useSystemThemeRef.current = false;
     setIsAnimating(true);
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     document.documentElement.setAttribute("data-theme", newTheme);
     localStorage.setItem("theme", newTheme);
-    setTimeout(() => setIsAnimating(false), THEME_ANIMATION_DURATION);
+    if (themeAnimationTimeoutRef.current) clearTimeout(themeAnimationTimeoutRef.current);
+    themeAnimationTimeoutRef.current = setTimeout(() => setIsAnimating(false), THEME_ANIMATION_DURATION);
   }, [theme]);
 
   const handleNavClick = useCallback((href: string) => {
     setMobileMenuOpen(false);
     const targetId = href.replace('#', '');
-    
+
     const element = document.getElementById(targetId);
     if (element) {
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - SMOOTH_SCROLL_OFFSET;
-      
+
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'
@@ -124,8 +187,8 @@ export default function Navbar() {
   return (
     <header className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
       <div className="container">
-        <Link 
-          href="#home" 
+        <Link
+          href="#home"
           className="logo"
           onClick={(e) => {
             e.preventDefault();
@@ -135,8 +198,8 @@ export default function Navbar() {
           Nirush<span> Man</span>
         </Link>
 
-        <nav 
-          className={`nav-menu ${mobileMenuOpen ? "active" : ""}`} 
+        <nav
+          className={`nav-menu ${mobileMenuOpen ? "active" : ""}`}
           id="navMenu"
           aria-label="Main navigation"
         >
@@ -180,9 +243,9 @@ export default function Navbar() {
           </button>
         </div>
       </div>
-      
+
       {mobileMenuOpen && (
-        <div 
+        <div
           className="mobile-menu-overlay"
           onClick={() => setMobileMenuOpen(false)}
           aria-hidden="true"

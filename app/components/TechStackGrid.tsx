@@ -1,6 +1,7 @@
 "use client";
 
 import { Skill } from "./portfolioData";
+import Image from "next/image";
 
 interface TechStackGridProps {
     skills: Skill[];
@@ -17,6 +18,7 @@ export default function TechStackGrid({ skills }: TechStackGridProps) {
             {skills.map((category, idx) => (
                 <div key={category.title} className="space-y-6">
                     <div className="flex items-center gap-3 mb-6 px-4 md:px-0 max-w-6xl mx-auto">
+                        <i className={`${category.icon} text-lg text-slate-300`} aria-hidden="true" />
                         <h3 className="text-xl md:text-2xl font-semibold text-gray-200 tracking-wide">
                             {category.title}
                         </h3>
@@ -38,7 +40,7 @@ export default function TechStackGrid({ skills }: TechStackGridProps) {
                             {/* Duplicate items for seamless scrolling effect */}
                             {[...Array(DUPLICATE_COUNT)].map((_, duplicateIndex) => (
                                 <div key={duplicateIndex} className="flex gap-4 md:gap-6 shrink-0">
-                                    {category.items.map((item, index) => (
+                                    {category.items.map((item) => (
                                         <div
                                             key={`${duplicateIndex}-${item.name}`}
                                             className="group/item relative flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:bg-white/10 hover:border-purple-500/30 hover:shadow-[0_0_15px_rgba(168,85,247,0.15)] shrink-0"
@@ -47,9 +49,11 @@ export default function TechStackGrid({ skills }: TechStackGridProps) {
                                         >
                                             {/* Icon rendering logic: Image or Font Icon */}
                                             {item.icon.startsWith("/") ? (
-                                                <img
+                                                <Image
                                                     src={item.icon}
                                                     alt={`${item.name} icon`}
+                                                    width={48}
+                                                    height={48}
                                                     className="w-10 h-10 sm:w-12 sm:h-12 transition-transform duration-300 group-hover/item:scale-110 drop-shadow-lg object-contain"
                                                 />
                                             ) : (

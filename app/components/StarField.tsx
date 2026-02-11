@@ -1,22 +1,47 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { checkReducedMotion } from "@/app/utils/animations";
 
 // Star field configuration
 const STAR_CONFIG = {
-  count: 150,          // Total number of stars
-  maxSize: 1.5,        // Maximum star size in pixels
-  minOpacity: 0.1,     // Minimum star opacity
-  maxOpacity: 0.6,     // Maximum star opacity (0.5 + 0.1)
-  minSpeed: 0.05,      // Minimum vertical speed
-  maxSpeed: 0.25,      // Maximum vertical speed (0.2 + 0.05)
-  canvasOpacity: 0.6,  // Overall canvas opacity
+    count: 150,
+    maxSize: 1.5,
+    minOpacity: 0.1,
+    maxOpacity: 0.6,
+    minSpeed: 0.05,
+    maxSpeed: 0.25,
+    canvasOpacity: 0.6,
 } as const;
 
 export default function StarField() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [isInView, setIsInView] = useState(false);
 
     useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        if (typeof IntersectionObserver === "undefined") {
+            setIsInView(true);
+            return;
+        }
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsInView(entry.isIntersecting);
+            },
+            { threshold: 0.05 }
+        );
+
+        observer.observe(canvas);
+
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
+        if (!isInView || checkReducedMotion()) return;
+
         const canvas = canvasRef.current;
         if (!canvas) return;
 
@@ -77,7 +102,7 @@ export default function StarField() {
             window.removeEventListener("resize", setSize);
             cancelAnimationFrame(animId);
         };
-    }, []);
+    }, [isInView]);
 
     return (
         <canvas

@@ -2,16 +2,16 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useTextAnimation } from "@/app/hooks/useTextAnimation";
 import TechStackGrid from "./TechStackGrid";
 import StarField from "./StarField";
+import anime from "animejs/lib/anime.es.js";
+import { checkReducedMotion, EASINGS, DURATIONS } from "@/app/utils/animations";
 import {
   PROJECTS,
   CERTIFICATIONS,
   SKILLS,
-  type Project,
-  type Certification,
-  type Skill,
   type Tab,
 } from "./portfolioData";
 
@@ -27,15 +27,18 @@ const TABS: Tab[] = [
 ];
 
 export default function PortfolioSection() {
-  const [activeTab, setActiveTab] = useState<"projects" | "certifications" | "skills">("projects");
+  const [activeTab, setActiveTab] = useState<Tab["id"]>("projects");
   const [modal, setModal] = useState<{ isOpen: boolean; imageSrc: string }>({ isOpen: false, imageSrc: "" });
 
   const [titleRef, isTitleVisible] = useTextAnimation<HTMLHeadingElement>({ delay: 100 });
 
   // Animate cards on scroll
   useEffect(() => {
-    const cards = document.querySelectorAll('.project-card');
+    if (checkReducedMotion()) return;
 
+    const panel = document.getElementById(activeTab);
+    const cards = panel ? panel.querySelectorAll<HTMLElement>(".project-card") : [];
+    if (cards.length === 0) return;
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry, index) => {
@@ -43,6 +46,16 @@ export default function PortfolioSection() {
             setTimeout(() => {
               entry.target.classList.add('animate-in');
             }, index * ANIMATION_STAGGER_DELAY);
+
+            anime({
+              targets: entry.target,
+              opacity: [0, 1],
+              translateY: [12, 0],
+              scale: [0.98, 1],
+              duration: 420,
+              easing: "easeOutQuad",
+              delay: index * ANIMATION_STAGGER_DELAY,
+            });
           }
         });
       },
@@ -51,6 +64,97 @@ export default function PortfolioSection() {
 
     cards.forEach((card) => observer.observe(card));
     return () => observer.disconnect();
+  }, [activeTab]);
+
+  // Enhanced project card hover animations
+  useEffect(() => {
+    if (checkReducedMotion()) return;
+
+    const panel = document.getElementById(activeTab);
+    const cards = panel ? panel.querySelectorAll<HTMLElement>(".project-card") : [];
+    if (cards.length === 0) return;
+
+    const handleMouseEnter = (e: Event) => {
+      const card = e.currentTarget as HTMLElement;
+      const image = card.querySelector('.project-image img');
+      const overlay = card.querySelector('.project-image-overlay');
+
+      anime({
+        targets: card,
+        translateY: -8,
+        duration: DURATIONS.micro,
+        easing: EASINGS.hover
+      });
+
+      if (image) {
+        anime({
+          targets: image,
+          scale: 1.08,
+          duration: 600,
+          easing: 'easeOutCubic'
+        });
+      }
+
+      if (overlay) {
+        anime({
+          targets: overlay,
+          opacity: [0.3, 0.6],
+          duration: DURATIONS.micro,
+          easing: 'linear'
+        });
+      }
+    };
+
+    const handleMouseLeave = (e: Event) => {
+      const card = e.currentTarget as HTMLElement;
+      const image = card.querySelector('.project-image img');
+      const overlay = card.querySelector('.project-image-overlay');
+
+      const targets = [card];
+      if (image) targets.push(image as HTMLElement);
+
+      anime({
+        targets,
+        translateY: 0,
+        scale: 1,
+        duration: 400,
+        easing: EASINGS.hover
+      });
+
+      if (overlay) {
+        anime({
+          targets: overlay,
+          opacity: 0.3,
+          duration: DURATIONS.micro,
+          easing: 'linear'
+        });
+      }
+    };
+
+    cards.forEach(card => {
+      card.addEventListener('mouseenter', handleMouseEnter);
+      card.addEventListener('mouseleave', handleMouseLeave);
+    });
+
+    return () => {
+      cards.forEach(card => {
+        card.removeEventListener('mouseenter', handleMouseEnter);
+        card.removeEventListener('mouseleave', handleMouseLeave);
+      });
+    };
+  }, [activeTab]);
+
+  // Tab change animation
+  useEffect(() => {
+    if (checkReducedMotion()) return;
+
+    anime({
+      targets: `#${activeTab}`,
+      opacity: [0, 1],
+      translateY: [8, 0],
+      duration: 350,
+      easing: "easeOutQuad",
+    });
   }, [activeTab]);
 
   // Modal handlers
@@ -66,6 +170,23 @@ export default function PortfolioSection() {
     };
 
     document.addEventListener('keydown', handleEscapeKey);
+
+    if (!checkReducedMotion()) {
+      anime({
+        targets: ".modal",
+        opacity: [0, 1],
+        duration: 250,
+        easing: "linear",
+      });
+      anime({
+        targets: ".modal-image-wrapper",
+        scale: [0.95, 1],
+        opacity: [0, 1],
+        duration: 350,
+        easing: "easeOutQuad",
+      });
+    }
+
     return () => {
       document.body.style.overflow = '';
       document.removeEventListener('keydown', handleEscapeKey);
@@ -80,7 +201,7 @@ export default function PortfolioSection() {
     setModal({ isOpen: false, imageSrc: "" });
   }, []);
 
-  const getTabCount = (tabId: string) => {
+  const getTabCount = (tabId: Tab["id"]) => {
     switch (tabId) {
       case 'projects': return PROJECTS.length;
       case 'certifications': return CERTIFICATIONS.length;
@@ -117,6 +238,7 @@ export default function PortfolioSection() {
           {TABS.map((tab) => (
             <button
               key={tab.id}
+              id={`${tab.id}-tab`}
               className={`tab-item ${activeTab === tab.id ? "active" : ""} ${activeTab === "skills" ? "text-slate-300 hover:text-white" : ""
                 } ${activeTab === "skills" && activeTab === tab.id ? "!text-white !bg-white/10" : ""}`}
               onClick={() => setActiveTab(tab.id)}
@@ -138,17 +260,18 @@ export default function PortfolioSection() {
           id="projects"
           role="tabpanel"
           aria-labelledby="projects-tab"
+          hidden={activeTab !== "projects"}
           className={`project-cards-container fade-in ${activeTab === "projects" ? "active" : ""}`}
         >
-          {PROJECTS.map((project, index) => (
-            <article key={index} className="project-card" style={{ '--card-index': index } as React.CSSProperties}>
+          {PROJECTS.map((project) => (
+            <article key={project.title} className="project-card">
               <div className="project-image">
-                <img
+                <Image
                   src={project.image}
                   alt={`Screenshot of ${project.title}`}
                   width={400}
                   height={200}
-                  loading="lazy"
+                  className="w-full h-full object-cover"
                 />
                 <div className="project-image-overlay" aria-hidden="true" />
               </div>
@@ -161,9 +284,9 @@ export default function PortfolioSection() {
                   ))}
                 </div>
                 <div className="project-actions">
-                  {project.links.map((link, i) => (
+                  {project.links.map((link) => (
                     <Link
-                      key={i}
+                      key={link.href}
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -184,17 +307,18 @@ export default function PortfolioSection() {
           id="certifications"
           role="tabpanel"
           aria-labelledby="certifications-tab"
+          hidden={activeTab !== "certifications"}
           className={`project-cards-container fade-in ${activeTab === "certifications" ? "active" : ""}`}
         >
-          {CERTIFICATIONS.map((cert, index) => (
-            <article key={index} className="project-card" style={{ '--card-index': index } as React.CSSProperties}>
+          {CERTIFICATIONS.map((cert) => (
+            <article key={cert.title} className="project-card">
               <div className="project-image cert-image">
-                <img
+                <Image
                   src={cert.image}
                   alt={`Certificate: ${cert.title}`}
                   width={400}
                   height={200}
-                  loading="lazy"
+                  className="w-full h-full object-cover"
                 />
                 <div className="cert-badge" aria-hidden="true">
                   <i className="fas fa-award"></i>
@@ -228,6 +352,7 @@ export default function PortfolioSection() {
           id="skills"
           role="tabpanel"
           aria-labelledby="skills-tab"
+          hidden={activeTab !== "skills"}
           className={`fade-in ${activeTab === "skills" ? "active" : "hidden"}`}
         >
           <TechStackGrid skills={SKILLS} />
@@ -241,6 +366,7 @@ export default function PortfolioSection() {
         role="dialog"
         aria-modal="true"
         aria-label="Certificate preview"
+        aria-hidden={!modal.isOpen}
       >
         <button
           className="close-modal"
@@ -251,7 +377,7 @@ export default function PortfolioSection() {
         </button>
         {modal.imageSrc && (
           <div className="modal-image-wrapper">
-            <img
+            <Image
               src={modal.imageSrc}
               alt="Certificate preview"
               width={800}

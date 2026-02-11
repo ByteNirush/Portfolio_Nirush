@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
+import { checkReducedMotion } from "@/app/utils/animations";
 
 interface Snowflake {
   x: number;
@@ -58,6 +59,7 @@ export default function SnowEffect() {
   const animationRef = useRef<number | null>(null);
   const snowflakesRef = useRef<Snowflake[]>([]);
   const dimensionsRef = useRef({ width: 0, height: 0 });
+  const [isInView, setIsInView] = useState(false);
 
   const getConfig = useCallback((): SnowConfig => {
     const windowWidth = typeof window !== "undefined" ? window.innerWidth : 1024;
@@ -92,6 +94,29 @@ export default function SnowEffect() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    if (typeof IntersectionObserver === "undefined") {
+      setIsInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.01 }
+    );
+
+    observer.observe(canvas);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isInView || checkReducedMotion()) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
@@ -108,7 +133,7 @@ export default function SnowEffect() {
         canvas.height = height * dpr;
         canvas.style.width = `${width}px`;
         canvas.style.height = `${height}px`;
-        ctx.scale(dpr, dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
         dimensionsRef.current = { width, height };
 
@@ -186,7 +211,7 @@ export default function SnowEffect() {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [getConfig, createSnowflake, initializeSnowflakes]);
+  }, [isInView, getConfig, createSnowflake, initializeSnowflakes]);
 
   return (
     <canvas

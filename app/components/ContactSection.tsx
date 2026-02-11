@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, FormEvent, useCallback } from "react";
+import { useState, FormEvent, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTextAnimation } from "@/app/hooks/useTextAnimation";
+import anime from "animejs/lib/anime.es.js";
+import { checkReducedMotion, EASINGS, DURATIONS } from "@/app/utils/animations";
 
 // Social media links configuration
 const SOCIAL_LINKS = [
@@ -35,10 +37,128 @@ export default function ContactSection() {
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_STATE);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle');
-  
+  const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [titleRef, isTitleVisible] = useTextAnimation<HTMLHeadingElement>({ delay: ANIMATION_DELAYS.title });
   const [subtitleRef, isSubtitleVisible] = useTextAnimation<HTMLParagraphElement>({ delay: ANIMATION_DELAYS.subtitle });
   const [formRef, isFormVisible] = useTextAnimation<HTMLFormElement>({ delay: ANIMATION_DELAYS.form });
+
+  // Enhanced success message animation
+  useEffect(() => {
+    if (submitStatus !== 'success' || checkReducedMotion()) return;
+
+    const successMessage = document.querySelector('.form-status.success');
+    if (!successMessage) return;
+
+    anime({
+      targets: successMessage,
+      translateY: [-20, 0],
+      scale: [0.95, 1.02, 1],
+      opacity: [0, 1],
+      duration: 600,
+      easing: EASINGS.bounce
+    });
+
+    // Subtle shake for attention
+    anime({
+      targets: successMessage,
+      translateX: [
+        { value: -3, duration: 100 },
+        { value: 3, duration: 100 },
+        { value: -2, duration: 100 },
+        { value: 2, duration: 100 },
+        { value: 0, duration: 100 }
+      ],
+      delay: 400,
+      easing: 'linear'
+    });
+  }, [submitStatus]);
+
+  // Submit button animation
+  useEffect(() => {
+    if (!isSubmitting || checkReducedMotion()) return;
+
+    anime({
+      targets: ".btn-submit",
+      scale: [1, 1.02, 1],
+      duration: 450,
+      easing: "easeInOutQuad",
+    });
+  }, [isSubmitting]);
+
+  // Consolidated animation event listeners
+  useEffect(() => {
+    if (checkReducedMotion()) return;
+
+    const inputs = document.querySelectorAll('.form-input');
+    const socialLinks = document.querySelectorAll(".social-link");
+
+    const handleFocus = (e: Event) => {
+      const input = e.currentTarget as HTMLElement;
+      const label = input.previousElementSibling;
+
+      anime({
+        targets: input,
+        scale: [1, 1.01],
+        duration: DURATIONS.micro,
+        easing: EASINGS.hover
+      });
+
+      if (label) {
+        anime({
+          targets: label,
+          translateY: [0, -2],
+          duration: DURATIONS.micro,
+          easing: EASINGS.hover
+        });
+      }
+    };
+
+    const handleBlur = (e: Event) => {
+      const input = e.currentTarget as HTMLElement;
+      const label = input.previousElementSibling;
+
+      anime({
+        targets: input,
+        scale: 1,
+        duration: DURATIONS.micro,
+        easing: EASINGS.hover
+      });
+
+      if (label) {
+        anime({
+          targets: label,
+          translateY: 0,
+          duration: DURATIONS.micro,
+          easing: EASINGS.hover
+        });
+      }
+    };
+
+    const handleSocialEnter = (event: Event) => {
+      anime({
+        targets: event.currentTarget as Element,
+        translateY: [-3, 0],
+        duration: 200,
+        easing: "easeOutQuad",
+      });
+    };
+
+    inputs.forEach(input => {
+      input.addEventListener('focus', handleFocus);
+      input.addEventListener('blur', handleBlur);
+    });
+
+    socialLinks.forEach(link => link.addEventListener("mouseenter", handleSocialEnter));
+
+    return () => {
+      inputs.forEach(input => {
+        input.removeEventListener('focus', handleFocus);
+        input.removeEventListener('blur', handleBlur);
+      });
+      socialLinks.forEach(link => link.removeEventListener("mouseenter", handleSocialEnter));
+    };
+  }, []);
 
   const handleInputChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -57,13 +177,13 @@ export default function ContactSection() {
 
     try {
       // TODO: Replace with actual API call
-      console.log("Form submitted:", formData);
       await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY));
 
       setFormData(INITIAL_FORM_STATE);
       setSubmitStatus('success');
-      
-      setTimeout(() => setSubmitStatus('idle'), SUCCESS_MESSAGE_DURATION);
+
+      if (successTimeoutRef.current) clearTimeout(successTimeoutRef.current);
+      successTimeoutRef.current = setTimeout(() => setSubmitStatus('idle'), SUCCESS_MESSAGE_DURATION);
     } catch (error) {
       console.error("Form submission error:", error);
       setSubmitStatus('error');
@@ -72,10 +192,18 @@ export default function ContactSection() {
     }
   };
 
+  useEffect(() => {
+    return () => {
+      if (successTimeoutRef.current) {
+        clearTimeout(successTimeoutRef.current);
+      }
+    };
+  }, []);
+
   return (
     <section id="contact" className="contact-section">
       <div className="container">
-        <h2 
+        <h2
           ref={titleRef}
           className={`section-title animate-hidden ${isTitleVisible ? 'animate-fade-in-down' : ''}`}
         >
@@ -83,13 +211,13 @@ export default function ContactSection() {
           Get In Touch
           <span className="title-decorator" aria-hidden="true" />
         </h2>
-        <p 
+        <p
           ref={subtitleRef}
           className={`contact-subtitle animate-hidden ${isSubtitleVisible ? 'animate-fade-in' : ''}`}
         >
           Have a project in mind or want to collaborate? Feel free to reach out!
         </p>
-        
+
         <form
           ref={formRef}
           id="contactForm"
@@ -103,14 +231,14 @@ export default function ContactSection() {
               Message sent successfully! I&apos;ll get back to you soon.
             </div>
           )}
-          
+
           {submitStatus === 'error' && (
             <div className="form-status error" role="alert">
               <i className="fas fa-exclamation-circle" aria-hidden="true"></i>
               Something went wrong. Please try again.
             </div>
           )}
-          
+
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="name" className="form-label">
@@ -184,9 +312,9 @@ export default function ContactSection() {
           <p className="social-title">Or connect with me on</p>
           <div className="social-links">
             {SOCIAL_LINKS.map((link) => (
-              <Link 
-                key={link.icon} 
-                href={link.href} 
+              <Link
+                key={link.icon}
+                href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="social-link"
