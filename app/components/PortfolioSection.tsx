@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import Image from "next/image";
 import { useTextAnimation } from "@/app/hooks/useTextAnimation";
@@ -29,8 +30,14 @@ const TABS: Tab[] = [
 export default function PortfolioSection() {
   const [activeTab, setActiveTab] = useState<Tab["id"]>("projects");
   const [modal, setModal] = useState<{ isOpen: boolean; imageSrc: string }>({ isOpen: false, imageSrc: "" });
+  const [isMounted, setIsMounted] = useState(false);
 
   const [titleRef, isTitleVisible] = useTextAnimation<HTMLHeadingElement>({ delay: 100 });
+
+  // Track client-side mounting for Portal
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Animate cards on scroll
   useEffect(() => {
@@ -359,35 +366,39 @@ export default function PortfolioSection() {
         </div>
       </div>
 
-      {/* Modal */}
-      <div
-        className={`modal ${modal.isOpen ? "open" : ""}`}
-        onClick={closeModal}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Certificate preview"
-        aria-hidden={!modal.isOpen}
-      >
-        <button
-          className="close-modal"
-          onClick={closeModal}
-          aria-label="Close modal"
-        >
-          &times;
-        </button>
-        {modal.imageSrc && (
-          <div className="modal-image-wrapper">
-            <Image
-              src={modal.imageSrc}
-              alt="Certificate preview"
-              width={800}
-              height={600}
-              className="modal-content"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
+      {/* Modal rendered via Portal to escape stacking context */}
+      {isMounted &&
+        createPortal(
+          <div
+            className={`modal ${modal.isOpen ? "open" : ""}`}
+            onClick={closeModal}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Certificate preview"
+            aria-hidden={!modal.isOpen}
+          >
+            <button
+              className="close-modal"
+              onClick={closeModal}
+              aria-label="Close modal"
+            >
+              &times;
+            </button>
+            {modal.imageSrc && (
+              <div className="modal-image-wrapper">
+                <Image
+                  src={modal.imageSrc}
+                  alt="Certificate preview"
+                  width={800}
+                  height={600}
+                  className="modal-content"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            )}
+          </div>,
+          document.body
         )}
-      </div>
     </section>
   );
 }

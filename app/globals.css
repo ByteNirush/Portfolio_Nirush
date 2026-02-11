@@ -1928,6 +1928,7 @@ ul {
   font-size: 30px;
   font-weight: 100;
   cursor: pointer;
+  background: rgba(255, 255, 255, 0.1);
   border: none;
   border-radius: 50%;
   width: 56px;
